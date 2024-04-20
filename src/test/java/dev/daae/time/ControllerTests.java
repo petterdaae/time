@@ -6,6 +6,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Base64;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,19 +24,22 @@ public class ControllerTests {
 
     @Test
     void statusEndpointReturns200WithValidCredentials() throws Exception {
-        this.mockMvc.perform(get("/").header("Authorization", ""))
+        var credentials = "username:password";
+        var base64 = Base64.getEncoder().encodeToString(credentials.getBytes());
+        this.mockMvc.perform(get("/status").header("Authorization", "Basic " + base64))
                 .andExpect(status().isOk());
     }
 
     @Test
     void statusEndpointReturns401WithoutCredentials() throws Exception {
-        this.mockMvc.perform(get("/").header("Authorization", ""))
-                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(get("/status")).andExpect(status().isUnauthorized());
     }
 
     @Test
-    void statusEndpointReturns403WithInvalidCredentials() throws Exception {
-        this.mockMvc.perform(get("/").header("Authorization", ""))
-                .andExpect(status().isForbidden());
+    void statusEndpointReturns401WithInvalidCredentials() throws Exception {
+        var credentials = "invalid:credentials";
+        var base64 = Base64.getEncoder().encodeToString(credentials.getBytes());
+        this.mockMvc.perform(get("/status").header("Authorization", "Basic " + base64))
+                .andExpect(status().isUnauthorized());
     }
 }
