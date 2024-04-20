@@ -5,6 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.time.OffsetDateTime;
+
 @Entity
 public class Log {
 
@@ -14,10 +16,13 @@ public class Log {
 
     private String description;
 
+    private OffsetDateTime timestamp;
+
     public Log() {}
 
-    public Log(String description) {
+    public Log(String description, OffsetDateTime timestamp) {
         this.description = description;
+        this.timestamp = timestamp;
     }
 
     public Long getId() {
@@ -26,5 +31,9 @@ public class Log {
 
     public String getDescription() {
         return description;
+    }
+
+    public OffsetDateTime getTimestamp() {
+        return timestamp;
     }
 }
