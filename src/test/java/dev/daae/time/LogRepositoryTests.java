@@ -3,7 +3,6 @@ package dev.daae.time;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.repository.CrudRepository;
 
 @SpringBootTest
 public class LogRepositoryTests {
@@ -13,7 +12,7 @@ public class LogRepositoryTests {
 
     @Test
     void testThatLogIsReturnedFromRepositoryAfterItIsSaved() {
-        var log = repository.save(new Log());
-        repository.findById(log.id).orElseThrow();
+        var log = repository.save(new Log("description"));
+        repository.findById(log.getId()).orElseThrow();
     }
 }
