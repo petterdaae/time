@@ -19,10 +19,6 @@ public class ControllerTests {
     private MockMvc mockMvc;
 
     @Test
-    void contextLoads() {
-    }
-
-    @Test
     void statusEndpointReturns200WithValidCredentials() throws Exception {
         var credentials = "username:password";
         var base64 = Base64.getEncoder().encodeToString(credentials.getBytes());
