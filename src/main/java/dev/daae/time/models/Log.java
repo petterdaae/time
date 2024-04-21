@@ -1,4 +1,4 @@
-package dev.daae.time;
+package dev.daae.time.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

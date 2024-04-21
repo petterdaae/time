@@ -1,5 +1,8 @@
 package dev.daae.time;
 
+import dev.daae.time.models.CreateLogRequest;
+import dev.daae.time.models.CreateLogResponse;
+import dev.daae.time.models.Log;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +14,7 @@ import java.time.ZoneOffset;
 @RequiredArgsConstructor
 public class Controller {
 
-    private LogRepository logRepository;
+    private final LogRepository logRepository;
 
     @GetMapping("/status")
     public String status() {
@@ -20,13 +23,13 @@ public class Controller {
 
     @PostMapping("/log")
     @ResponseStatus(HttpStatus.CREATED)
-    public String createLog(@RequestBody CreateLogRequest createLogRequest) {
-        logRepository.save(
+    public CreateLogResponse createLog(@RequestBody CreateLogRequest createLogRequest) {
+        var log = logRepository.save(
                 Log.builder()
                         .description(createLogRequest.description())
                         .timestamp(LocalDateTime.now().atOffset(ZoneOffset.UTC))
                         .build()
         );
-        return "CREATED";
+        return new CreateLogResponse(log.getId());
     }
 }
