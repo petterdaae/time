@@ -18,14 +18,14 @@ public class LogRepositoryTests {
 
     @Test
     void testThatLogIsReturnedFromRepositoryAfterItIsSaved() {
-        var log = repository.save(new Log("description", LocalDateTime.now().atOffset(ZoneOffset.UTC)));
+        var log = repository.save(Log.builder().description("description").timestamp(LocalDateTime.now().atOffset(ZoneOffset.UTC)).build());
         repository.findById(log.getId()).orElseThrow();
     }
 
     @Test
     void testThatTimestampIsEqualBeforeAndAfterStoringIt() {
         var timestamp = LocalDateTime.now().atOffset(ZoneOffset.UTC);
-        var id = repository.save(new Log("description", timestamp)).getId();
+        var id = repository.save(Log.builder().description("description").timestamp(timestamp).build()).getId();
         var log = repository.findById(id).orElseThrow();
         assertThat(log.getTimestamp()).isEqualTo(timestamp);
     }

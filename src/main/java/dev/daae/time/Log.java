@@ -4,10 +4,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 
 @Entity
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class Log {
 
     @Id
@@ -17,23 +25,4 @@ public class Log {
     private String description;
 
     private OffsetDateTime timestamp;
-
-    public Log() {}
-
-    public Log(String description, OffsetDateTime timestamp) {
-        this.description = description;
-        this.timestamp = timestamp;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public OffsetDateTime getTimestamp() {
-        return timestamp;
-    }
 }
