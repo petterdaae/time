@@ -1,7 +1,6 @@
 package dev.daae.time;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.daae.time.models.CreateLogRequest;
 import dev.daae.time.models.CreateLogResponse;
 import dev.daae.time.models.Log;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +35,7 @@ public class ControllerTests {
     @Autowired
     private LogRepository logRepository;
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     public void setup() {
@@ -73,16 +72,29 @@ public class ControllerTests {
 
     @Test
     void logEndpointCreatesLogInDatabase() throws Exception {
-        var request = new CreateLogRequest(Log.Kind.STOP);
         var result = this.mockMvc.perform(
                 post("/log")
                         .with(csrf())
                         .with(httpBasic("username", "password"))
-                        .content(mapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isCreated()).andReturn();
         var response = mapper.readValue(result.getResponse().getContentAsString(), CreateLogResponse.class);
         var savedLog = logRepository.findById(response.id()).orElseThrow();
-        assertThat(savedLog.getKind()).isEqualTo(request.kind());
+        assertThat(savedLog.getKind()).isEqualTo(Log.Kind.START);
+    }
+
+    @Test
+    void logEndpointSetsStopKindIfPreviousKindWasStart() throws Exception {
+        var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
+        logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
+        var result = this.mockMvc.perform(
+                post("/log")
+                        .with(csrf())
+                        .with(httpBasic("username", "password"))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isCreated()).andReturn();
+        var response = mapper.readValue(result.getResponse().getContentAsString(), CreateLogResponse.class);
+        var savedLog = logRepository.findById(response.id()).orElseThrow();
+        assertThat(savedLog.getKind()).isEqualTo(Log.Kind.STOP);
     }
 }

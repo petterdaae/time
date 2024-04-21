@@ -47,10 +47,13 @@ public class Controller {
 
     @PostMapping("/log")
     @ResponseStatus(HttpStatus.CREATED)
-    public CreateLogResponse createLog(@RequestBody CreateLogRequest createLogRequest) {
+    public CreateLogResponse createLog() {
+        var logs = logRepository.findAllByOrderByTimestampDesc();
+        var latestKind = logs.stream().findFirst().map(Log::getKind).orElse(Log.Kind.STOP);
+        var nextKind = latestKind == Log.Kind.STOP ? Log.Kind.START : Log.Kind.STOP;
         var log = logRepository.save(
                 Log.builder()
-                        .kind(createLogRequest.kind())
+                        .kind(nextKind)
                         .timestamp(LocalDateTime.now().atOffset(ZoneOffset.UTC))
                         .build()
         );
