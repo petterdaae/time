@@ -1,6 +1,5 @@
 package dev.daae.time;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.daae.time.models.CreateLogRequest;
 import dev.daae.time.models.CreateLogResponse;
@@ -26,11 +25,9 @@ public class ControllerTests {
     private MockMvc mockMvc;
 
     @Autowired
-    private LogRepository repository;
+    private LogRepository logRepository;
 
     private ObjectMapper mapper = new ObjectMapper();
-    @Autowired
-    private LogRepository logRepository;
 
     @Test
     void statusEndpointReturns200WithValidCredentials() throws Exception {
@@ -56,16 +53,11 @@ public class ControllerTests {
                 post("/log")
                         .with(csrf())
                         .with(httpBasic("username", "password"))
-                        .content(toJson(request))
+                        .content(mapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isCreated()).andReturn();
         var response = mapper.readValue(result.getResponse().getContentAsString(), CreateLogResponse.class);
         var savedLog = logRepository.findById(response.id()).orElseThrow();
         assertThat(savedLog.getDescription()).isEqualTo(request.description());
-    }
-
-    private String toJson(Object object) throws JsonProcessingException {
-        var mapper = new ObjectMapper();
-        return mapper.writeValueAsString(object);
     }
 }
