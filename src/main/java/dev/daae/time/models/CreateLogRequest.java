@@ -1,3 +1,3 @@
 package dev.daae.time.models;
 
-public record CreateLogRequest(String description) {}
+public record CreateLogRequest(Log.Kind kind) {}

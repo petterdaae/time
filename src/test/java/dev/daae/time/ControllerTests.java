@@ -3,6 +3,7 @@ package dev.daae.time;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.daae.time.models.CreateLogRequest;
 import dev.daae.time.models.CreateLogResponse;
+import dev.daae.time.models.Log;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,7 +49,7 @@ public class ControllerTests {
 
     @Test
     void logEndpointCreatesLogInDatabase() throws Exception {
-        var request = new CreateLogRequest("description");
+        var request = new CreateLogRequest(Log.Kind.STOP);
         var result = this.mockMvc.perform(
                 post("/log")
                         .with(csrf())
@@ -58,6 +59,6 @@ public class ControllerTests {
         ).andExpect(status().isCreated()).andReturn();
         var response = mapper.readValue(result.getResponse().getContentAsString(), CreateLogResponse.class);
         var savedLog = logRepository.findById(response.id()).orElseThrow();
-        assertThat(savedLog.getDescription()).isEqualTo(request.description());
+        assertThat(savedLog.getKind()).isEqualTo(request.kind());
     }
 }

@@ -26,7 +26,7 @@ public class Controller {
     public CreateLogResponse createLog(@RequestBody CreateLogRequest createLogRequest) {
         var log = logRepository.save(
                 Log.builder()
-                        .description(createLogRequest.description())
+                        .kind(createLogRequest.kind())
                         .timestamp(LocalDateTime.now().atOffset(ZoneOffset.UTC))
                         .build()
         );

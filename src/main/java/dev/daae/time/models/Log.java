@@ -1,9 +1,6 @@
 package dev.daae.time.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,11 +15,14 @@ import java.time.OffsetDateTime;
 @Builder(toBuilder = true)
 public class Log {
 
+    public enum Kind { START, STOP };
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String description;
+    @Enumerated(EnumType.STRING)
+    private Kind kind;
 
     private OffsetDateTime timestamp;
 }
