@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.*;
 @AutoConfigureMockMvc
 public class ControllerTests {
 
-    private static final Logger log = LoggerFactory.getLogger(ControllerTests.class);
     @Autowired
     private MockMvc mockMvc;
 
