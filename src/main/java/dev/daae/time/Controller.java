@@ -8,8 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.TemporalUnit;
-import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,5 +59,10 @@ public class Controller {
                         .build()
         );
         return new CreateLogResponse(log.getId());
+    }
+
+    @GetMapping("/log")
+    public List<Log> getAllLogs() {
+        return logRepository.findAll();
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -95,5 +96,18 @@ public class ControllerTests {
         var response = mapper.readValue(result.getResponse().getContentAsString(), CreateLogResponse.class);
         var savedLog = logRepository.findById(response.id()).orElseThrow();
         assertThat(savedLog.getKind()).isEqualTo(Log.Kind.STOP);
+    }
+
+    @Test
+    void logEndpointReturnsCorrectAmountOfLogs() throws Exception {
+        var logBuilder = Log.builder().kind(Log.Kind.START).timestamp(OffsetDateTime.now());
+        for (int i = 0; i < 5; i++) {
+            logRepository.save(logBuilder.build());
+        }
+        this.mockMvc.perform(
+                get("/log")
+                        .with(csrf())
+                        .with(httpBasic("username", "password"))
+        ).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(5));
     }
 }
