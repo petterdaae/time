@@ -1,0 +1,1 @@
+create cast (varchar as kind) with inout as implicit;

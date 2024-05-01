@@ -3,14 +3,13 @@ package dev.daae.time;
 import dev.daae.time.models.Log;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest
+@IntegrationTest
 public class LogRepositoryTests {
 
     @Autowired
