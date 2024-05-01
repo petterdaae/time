@@ -74,7 +74,6 @@ public class ControllerTests {
     void logEndpointCreatesLogInDatabase() throws Exception {
         var result = this.mockMvc.perform(
                 post("/log")
-                        .with(csrf())
                         .with(httpBasic("username", "password"))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isCreated()).andReturn();
@@ -89,7 +88,6 @@ public class ControllerTests {
         logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
         var result = this.mockMvc.perform(
                 post("/log")
-                        .with(csrf())
                         .with(httpBasic("username", "password"))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isCreated()).andReturn();
