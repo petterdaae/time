@@ -5,6 +5,6 @@ import org.junit.jupiter.api.Test;
 @IntegrationTest
 class TimeApplicationTests {
 
-	@Test
-	void contextLoads() {}
+  @Test
+  void contextLoads() {}
 }
