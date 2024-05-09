@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.daae.time.models.CreateLogResponse;
 import dev.daae.time.models.Log;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 @IntegrationTest
@@ -73,9 +71,9 @@ public class ControllerTests {
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
             .andReturn();
-    var response =
-        mapper.readValue(result.getResponse().getContentAsString(), CreateLogResponse.class);
-    var savedLog = logRepository.findById(response.id()).orElseThrow();
+    var responseBody = result.getResponse().getContentAsString();
+    assertThat(responseBody).isEqualTo("Started.");
+    var savedLog = logRepository.findFirstByOrderByTimestampDesc().orElseThrow();
     assertThat(savedLog.getKind()).isEqualTo(Log.Kind.START);
   }
 
@@ -91,9 +89,9 @@ public class ControllerTests {
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
             .andReturn();
-    var response =
-        mapper.readValue(result.getResponse().getContentAsString(), CreateLogResponse.class);
-    var savedLog = logRepository.findById(response.id()).orElseThrow();
+    var responseBody = result.getResponse().getContentAsString();
+    assertThat(responseBody).isEqualTo("Stopped.");
+    var savedLog = logRepository.findFirst2ByOrderByTimestampDesc().getFirst();
     assertThat(savedLog.getKind()).isEqualTo(Log.Kind.STOP);
   }
 
@@ -117,15 +115,30 @@ public class ControllerTests {
 
     var end = LocalDateTime.of(2020, 1, 1, 2, 3).atOffset(ZoneOffset.UTC);
     when(clock.instant()).thenReturn(end.toInstant());
-    var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+    var result =
+        this.mockMvc
+            .perform(get("/status/current").with(httpBasic("username", "password")))
+            .andReturn();
     var responseBody = result.getResponse().getContentAsString();
     assertThat(responseBody).isEqualTo("In progress, 2 hours and 3 minutes.");
 
     end = LocalDateTime.of(2020, 1, 1, 2, 0).atOffset(ZoneOffset.UTC);
     when(clock.instant()).thenReturn(end.toInstant());
-    result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+    result =
+        this.mockMvc
+            .perform(get("/status/current").with(httpBasic("username", "password")))
+            .andReturn();
     responseBody = result.getResponse().getContentAsString();
     assertThat(responseBody).isEqualTo("In progress, 2 hours.");
+
+    end = LocalDateTime.of(2020, 1, 1, 0, 3).atOffset(ZoneOffset.UTC);
+    when(clock.instant()).thenReturn(end.toInstant());
+    result =
+        this.mockMvc
+            .perform(get("/status/current").with(httpBasic("username", "password")))
+            .andReturn();
+    responseBody = result.getResponse().getContentAsString();
+    assertThat(responseBody).isEqualTo("In progress, 3 minutes.");
   }
 
   @Test
@@ -134,7 +147,10 @@ public class ControllerTests {
     var end = LocalDateTime.of(2020, 1, 1, 2, 3).atOffset(ZoneOffset.UTC);
     logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
     logRepository.save(Log.builder().kind(Log.Kind.STOP).timestamp(end).build());
-    var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+    var result =
+        this.mockMvc
+            .perform(get("/status/current").with(httpBasic("username", "password")))
+            .andReturn();
     var responseBody = result.getResponse().getContentAsString();
     assertThat(responseBody).isEqualTo("Previous, 2 hours and 3 minutes.");
 
@@ -142,14 +158,20 @@ public class ControllerTests {
     end = LocalDateTime.of(2020, 1, 1, 8, 0).atOffset(ZoneOffset.UTC);
     logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
     logRepository.save(Log.builder().kind(Log.Kind.STOP).timestamp(end).build());
-    result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+    result =
+        this.mockMvc
+            .perform(get("/status/current").with(httpBasic("username", "password")))
+            .andReturn();
     responseBody = result.getResponse().getContentAsString();
     assertThat(responseBody).isEqualTo("Previous, 3 hours.");
   }
 
   @Test
   void currentStatusEndpointReturnsEmptyMessageWhenThereAreNoLogsInTheDatabase() throws Exception {
-    var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+    var result =
+        this.mockMvc
+            .perform(get("/status/current").with(httpBasic("username", "password")))
+            .andReturn();
     var responseBody = result.getResponse().getContentAsString();
     assertThat(responseBody).isEqualTo("No logs in database.");
   }

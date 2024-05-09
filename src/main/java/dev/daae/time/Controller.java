@@ -24,17 +24,16 @@ public class Controller {
 
   @PostMapping("/log")
   @ResponseStatus(HttpStatus.CREATED)
-  public CreateLogResponse createLog() {
+  public String createLog() {
     var logs = logRepository.findAllByOrderByTimestampDesc();
     var latestKind = logs.stream().findFirst().map(Log::getKind).orElse(Log.Kind.STOP);
     var nextKind = latestKind == Log.Kind.STOP ? Log.Kind.START : Log.Kind.STOP;
-    var log =
-        logRepository.save(
-            Log.builder()
-                .kind(nextKind)
-                .timestamp(LocalDateTime.now().atOffset(ZoneOffset.UTC))
-                .build());
-    return new CreateLogResponse(log.getId());
+    logRepository.save(
+        Log.builder()
+            .kind(nextKind)
+            .timestamp(LocalDateTime.now().atOffset(ZoneOffset.UTC))
+            .build());
+    return nextKind == Log.Kind.START ? "Started." : "Stopped.";
   }
 
   @GetMapping("/log")

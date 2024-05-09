@@ -2,12 +2,9 @@ package dev.daae.time.services;
 
 import dev.daae.time.LogRepository;
 import dev.daae.time.models.Log;
-import dev.daae.time.models.StatusResponse;
-import dev.daae.time.models.StatusResponseStats;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -58,10 +55,10 @@ public class StatusService {
 
     if (duration.toMinutesPart() != 0) {
       if (!formattedDuration.isEmpty()) {
-        formattedDuration += " and";
+        formattedDuration += " and ";
       }
 
-      formattedDuration += " " + duration.toMinutesPart() + " minutes";
+      formattedDuration += duration.toMinutesPart() + " minutes";
     }
 
     if (formattedDuration.isEmpty()) {
