@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -174,5 +175,14 @@ public class ControllerTests {
             .andReturn();
     var responseBody = result.getResponse().getContentAsString();
     assertThat(responseBody).isEqualTo("No logs in database.");
+  }
+
+  @Test
+  void testThatAllLogsAreDeleted() throws Exception {
+    var result =
+        this.mockMvc.perform(delete("/log").with(httpBasic("username", "password"))).andReturn();
+    var responseBody = result.getResponse().getContentAsString();
+    assertThat(responseBody).isEqualTo("All logs deleted.");
+    assertThat(logRepository.findAll()).isEmpty();
   }
 }

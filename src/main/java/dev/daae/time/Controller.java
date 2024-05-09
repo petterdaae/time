@@ -40,4 +40,10 @@ public class Controller {
   public List<Log> getAllLogs() {
     return logRepository.findAll();
   }
+
+  @DeleteMapping("/log")
+  public String deleteAllLogs() {
+    logRepository.deleteAll();
+    return "All logs deleted.";
+  }
 }
