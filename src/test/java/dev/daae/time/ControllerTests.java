@@ -1,6 +1,7 @@
 package dev.daae.time;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,14 +12,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.daae.time.models.CreateLogResponse;
 import dev.daae.time.models.Log;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 @IntegrationTest
@@ -29,42 +34,33 @@ public class ControllerTests {
 
   @Autowired private LogRepository logRepository;
 
+  @MockBean private Clock clock;
+
   private final ObjectMapper mapper = new ObjectMapper();
 
   @BeforeEach
   public void setup() {
     logRepository.deleteAll();
+    when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
   }
 
   @Test
-  void statusEndpointReturns200WithValidCredentials() throws Exception {
+  void currentStatusEndpointReturns200WithValidCredentials() throws Exception {
     this.mockMvc
-        .perform(get("/status").with(httpBasic("username", "password")))
+        .perform(get("/status/current").with(httpBasic("username", "password")))
         .andExpect(status().isOk());
   }
 
   @Test
-  void statusEndpointReturns401WithoutCredentials() throws Exception {
-    this.mockMvc.perform(get("/status")).andExpect(status().isUnauthorized());
+  void currentStatusEndpointReturns401WithoutCredentials() throws Exception {
+    this.mockMvc.perform(get("/status/current")).andExpect(status().isUnauthorized());
   }
 
   @Test
-  void statusEndpointReturns401WithInvalidCredentials() throws Exception {
+  void currentStatusEndpointReturns401WithInvalidCredentials() throws Exception {
     this.mockMvc
-        .perform(get("/status").with(httpBasic("invalid", "credentials")))
+        .perform(get("/status/current").with(httpBasic("invalid", "credentials")))
         .andExpect(status().isUnauthorized());
-  }
-
-  @Test
-  void statusEndpointReturnsCorrectPreviousDifference() throws Exception {
-    var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
-    var stop = LocalDateTime.of(2020, 1, 1, 1, 0).atOffset(ZoneOffset.UTC);
-    logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
-    logRepository.save(Log.builder().kind(Log.Kind.STOP).timestamp(stop).build());
-    this.mockMvc
-        .perform(get("/status").with(httpBasic("username", "password")))
-        .andExpect(jsonPath("$.status").value("Stopped"))
-        .andExpect(jsonPath("$.stats.previous").value("01:00:00"));
   }
 
   @Test
@@ -111,5 +107,50 @@ public class ControllerTests {
         .perform(get("/log").with(csrf()).with(httpBasic("username", "password")))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(5));
+  }
+
+  @Test
+  void currentStatusEndpointDescribesCurrentSessionIfTheLatestLogIsStart() throws Exception {
+    var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
+    logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
+    when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
+
+    var end = LocalDateTime.of(2020, 1, 1, 2, 3).atOffset(ZoneOffset.UTC);
+    when(clock.instant()).thenReturn(end.toInstant());
+    var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+    var responseBody = result.getResponse().getContentAsString();
+    assertThat(responseBody).isEqualTo("In progress, 2 hours and 3 minutes.");
+
+    end = LocalDateTime.of(2020, 1, 1, 2, 0).atOffset(ZoneOffset.UTC);
+    when(clock.instant()).thenReturn(end.toInstant());
+    result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+    responseBody = result.getResponse().getContentAsString();
+    assertThat(responseBody).isEqualTo("In progress, 2 hours.");
+  }
+
+  @Test
+  void currentStatusEndpointDescribesPreviousSessionIfTheLatestLogIsStop() throws Exception {
+    var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
+    var end = LocalDateTime.of(2020, 1, 1, 2, 3).atOffset(ZoneOffset.UTC);
+    logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
+    logRepository.save(Log.builder().kind(Log.Kind.STOP).timestamp(end).build());
+    var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+    var responseBody = result.getResponse().getContentAsString();
+    assertThat(responseBody).isEqualTo("Previous, 2 hours and 3 minutes.");
+
+    start = LocalDateTime.of(2020, 1, 1, 5, 0).atOffset(ZoneOffset.UTC);
+    end = LocalDateTime.of(2020, 1, 1, 8, 0).atOffset(ZoneOffset.UTC);
+    logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
+    logRepository.save(Log.builder().kind(Log.Kind.STOP).timestamp(end).build());
+    result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+    responseBody = result.getResponse().getContentAsString();
+    assertThat(responseBody).isEqualTo("Previous, 3 hours.");
+  }
+
+  @Test
+  void currentStatusEndpointReturnsEmptyMessageWhenThereAreNoLogsInTheDatabase() throws Exception {
+    var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+    var responseBody = result.getResponse().getContentAsString();
+    assertThat(responseBody).isEqualTo("No logs in database.");
   }
 }

@@ -4,7 +4,9 @@ import dev.daae.time.LogRepository;
 import dev.daae.time.models.Log;
 import dev.daae.time.models.StatusResponse;
 import dev.daae.time.models.StatusResponseStats;
+import java.time.Clock;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,37 +17,57 @@ public class StatusService {
 
   private final LogRepository logRepository;
 
-  public StatusResponse getStatus() {
-    var logs = logRepository.findAllByOrderByTimestampDesc();
+  private final Clock clock;
 
-    var status = this.status(logs);
-    var previous = this.getPreviousInterval(logs);
+  public String currentStatus() {
+    var optionalLatest = logRepository.findFirstByOrderByTimestampDesc();
+    if (optionalLatest.isEmpty()) {
+      return "No logs in database.";
+    }
 
-    return StatusResponse.builder()
-        .status(status)
-        .stats(StatusResponseStats.builder().previous(previous).build())
-        .build();
+    var latest = optionalLatest.get();
+
+    if (latest.getKind() == Log.Kind.START) {
+      var start = latest.getTimestamp();
+      var end = OffsetDateTime.now(clock);
+      var duration = Duration.between(start, end);
+      var formattedDuration = formatDuration(duration);
+      return "In progress, " + formattedDuration + ".";
+    }
+
+    var first2List = logRepository.findFirst2ByOrderByTimestampDesc();
+    if (first2List.size() != 2 || first2List.get(1).getKind() == Log.Kind.STOP) {
+      return "There is something wrong with the integrity of the log table.";
+    }
+
+    var secondLatest = first2List.get(1);
+
+    var start = secondLatest.getTimestamp();
+    var end = latest.getTimestamp();
+    var duration = Duration.between(start, end);
+    var formattedDuration = formatDuration(duration);
+    return "Previous, " + formattedDuration + ".";
   }
 
-  private String status(List<Log> logs) {
-    var latest = logs.stream().findFirst();
-    var latestKind = latest.map(Log::getKind).orElse(Log.Kind.STOP);
-    return latestKind == Log.Kind.STOP ? "Stopped" : "Started";
-  }
+  private String formatDuration(Duration duration) {
+    var formattedDuration = "";
 
-  private String getPreviousInterval(List<Log> logs) {
-    var latest = logs.stream().findFirst();
-    var secondLatest = logs.stream().skip(1).findFirst();
+    if (duration.toHours() != 0) {
+      formattedDuration += duration.toHours() + " hours";
+    }
 
-    var latestTimestamp = latest.map(Log::getTimestamp);
-    var secondLatestTimestamp = secondLatest.map(Log::getTimestamp);
+    if (duration.toMinutesPart() != 0) {
+      if (!formattedDuration.isEmpty()) {
+        formattedDuration += " and";
+      }
 
-    var difference =
-        latestTimestamp.flatMap(t1 -> secondLatestTimestamp.map(t0 -> Duration.between(t0, t1)));
+      formattedDuration += " " + duration.toMinutesPart() + " minutes";
+    }
 
-    return difference
-        .map(
-            d -> String.format("%02d:%02d:%02d", d.toHours(), d.toMinutesPart(), d.toSecondsPart()))
-        .orElse(null);
+    if (formattedDuration.isEmpty()) {
+      return "0 minutes";
+    }
+
+    return formattedDuration;
   }
 }

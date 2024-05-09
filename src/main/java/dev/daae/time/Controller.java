@@ -17,9 +17,9 @@ public class Controller {
 
   private final StatusService statusService;
 
-  @GetMapping("/status")
-  public StatusResponse status() {
-    return statusService.getStatus();
+  @GetMapping("/status/current")
+  public String currentStatus() {
+    return statusService.currentStatus();
   }
 
   @PostMapping("/log")
