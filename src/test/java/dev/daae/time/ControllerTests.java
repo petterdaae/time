@@ -11,8 +11,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.daae.time.models.Log;
+import dev.daae.time.models.Session;
+import dev.daae.time.repository.SessionRepository;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -31,7 +33,7 @@ public class ControllerTests {
 
   @Autowired private MockMvc mockMvc;
 
-  @Autowired private LogRepository logRepository;
+  @Autowired private SessionRepository sessionRepository;
 
   @MockBean private Clock clock;
 
@@ -39,8 +41,9 @@ public class ControllerTests {
 
   @BeforeEach
   public void setup() {
-    logRepository.deleteAll();
+    sessionRepository.deleteAll();
     when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
+    when(clock.instant()).thenReturn(Instant.now());
   }
 
   @Test
@@ -63,47 +66,49 @@ public class ControllerTests {
   }
 
   @Test
-  void logEndpointCreatesLogInDatabase() throws Exception {
+  void sessionEndpointCreatesSessionInDatabase() throws Exception {
     var result =
         this.mockMvc
             .perform(
-                post("/log")
+                post("/session")
                     .with(httpBasic("username", "password"))
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
             .andReturn();
     var responseBody = result.getResponse().getContentAsString();
     assertThat(responseBody).isEqualTo("Started.");
-    var savedLog = logRepository.findFirstByOrderByTimestampDesc().orElseThrow();
-    assertThat(savedLog.getKind()).isEqualTo(Log.Kind.START);
+    var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
+    assertThat(savedSession.getStart()).isNotNull();
+    assertThat(savedSession.getEnd()).isEmpty();
   }
 
   @Test
   void logEndpointSetsStopKindIfPreviousKindWasStart() throws Exception {
     var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
-    logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
+    sessionRepository.save(Session.builder().start(start).build());
     var result =
         this.mockMvc
             .perform(
-                post("/log")
+                post("/session")
                     .with(httpBasic("username", "password"))
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
             .andReturn();
     var responseBody = result.getResponse().getContentAsString();
     assertThat(responseBody).isEqualTo("Stopped.");
-    var savedLog = logRepository.findFirst2ByOrderByTimestampDesc().getFirst();
-    assertThat(savedLog.getKind()).isEqualTo(Log.Kind.STOP);
+    var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
+    assertThat(savedSession.getStart()).isNotNull();
+    assertThat(savedSession.getEnd()).isPresent();
   }
 
   @Test
   void logEndpointReturnsCorrectAmountOfLogs() throws Exception {
-    var logBuilder = Log.builder().kind(Log.Kind.START).timestamp(OffsetDateTime.now());
+    var sessionBuilder = Session.builder().start(OffsetDateTime.now());
     for (int i = 0; i < 5; i++) {
-      logRepository.save(logBuilder.build());
+      sessionRepository.save(sessionBuilder.build());
     }
     this.mockMvc
-        .perform(get("/log").with(csrf()).with(httpBasic("username", "password")))
+        .perform(get("/session").with(csrf()).with(httpBasic("username", "password")))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(5));
   }
@@ -111,7 +116,7 @@ public class ControllerTests {
   @Test
   void currentStatusEndpointDescribesCurrentSessionIfTheLatestLogIsStart() throws Exception {
     var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
-    logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
+    sessionRepository.save(Session.builder().start(start).build());
     when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
 
     var end = LocalDateTime.of(2020, 1, 1, 2, 3).atOffset(ZoneOffset.UTC);
@@ -146,8 +151,7 @@ public class ControllerTests {
   void currentStatusEndpointDescribesPreviousSessionIfTheLatestLogIsStop() throws Exception {
     var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
     var end = LocalDateTime.of(2020, 1, 1, 2, 3).atOffset(ZoneOffset.UTC);
-    logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
-    logRepository.save(Log.builder().kind(Log.Kind.STOP).timestamp(end).build());
+    sessionRepository.save(Session.builder().start(start).end(end).build());
     var result =
         this.mockMvc
             .perform(get("/status/current").with(httpBasic("username", "password")))
@@ -157,8 +161,7 @@ public class ControllerTests {
 
     start = LocalDateTime.of(2020, 1, 1, 5, 0).atOffset(ZoneOffset.UTC);
     end = LocalDateTime.of(2020, 1, 1, 8, 0).atOffset(ZoneOffset.UTC);
-    logRepository.save(Log.builder().kind(Log.Kind.START).timestamp(start).build());
-    logRepository.save(Log.builder().kind(Log.Kind.STOP).timestamp(end).build());
+    sessionRepository.save(Session.builder().start(start).end(end).build());
     result =
         this.mockMvc
             .perform(get("/status/current").with(httpBasic("username", "password")))
@@ -168,21 +171,21 @@ public class ControllerTests {
   }
 
   @Test
-  void currentStatusEndpointReturnsEmptyMessageWhenThereAreNoLogsInTheDatabase() throws Exception {
+  void currentStatusEndpointReturnsEmptyMessageWhenThereAreNoSessionsInTheDatabase() throws Exception {
     var result =
         this.mockMvc
             .perform(get("/status/current").with(httpBasic("username", "password")))
             .andReturn();
     var responseBody = result.getResponse().getContentAsString();
-    assertThat(responseBody).isEqualTo("No logs in database.");
+    assertThat(responseBody).isEqualTo("No sessions in database.");
   }
 
   @Test
-  void testThatAllLogsAreDeleted() throws Exception {
+  void testThatAllSessionsAreDeleted() throws Exception {
     var result =
-        this.mockMvc.perform(delete("/log").with(httpBasic("username", "password"))).andReturn();
+        this.mockMvc.perform(delete("/session").with(httpBasic("username", "password"))).andReturn();
     var responseBody = result.getResponse().getContentAsString();
-    assertThat(responseBody).isEqualTo("All logs deleted.");
-    assertThat(logRepository.findAll()).isEmpty();
+    assertThat(responseBody).isEqualTo("All sessions deleted.");
+    assertThat(sessionRepository.findAll()).isEmpty();
   }
 }

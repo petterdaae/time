@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import dev.daae.time.repository.SessionRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,11 +19,11 @@ public class ExceptionHandlerTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockBean private LogRepository logRepository;
+  @MockBean private SessionRepository sessionRepository;
 
   @Test
   void statusEndpointReturns500WhenLogRepositoryThrowsException() throws Exception {
-    when(logRepository.findAllByOrderByTimestampDesc()).thenThrow(new RuntimeException());
+    when(sessionRepository.findFirstByOrderByStartDesc()).thenThrow(new RuntimeException());
     this.mockMvc
         .perform(get("/status").with(httpBasic("username", "password")))
         .andExpect(status().isInternalServerError())
@@ -31,7 +32,7 @@ public class ExceptionHandlerTest {
 
   @Test
   void statusEndpointReturns500WhenLogRepositoryThrowsNullPointerException() throws Exception {
-    when(logRepository.findAllByOrderByTimestampDesc()).thenThrow(new NullPointerException());
+    when(sessionRepository.findFirstByOrderByStartDesc()).thenThrow(new NullPointerException());
     this.mockMvc
         .perform(get("/status").with(httpBasic("username", "password")))
         .andExpect(status().isInternalServerError())

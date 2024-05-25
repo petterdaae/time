@@ -1,10 +1,10 @@
 package dev.daae.time.services;
 
-import dev.daae.time.LogRepository;
-import dev.daae.time.models.Log;
+import dev.daae.time.repository.SessionRepository;
 import java.time.Clock;
 import java.time.Duration;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,37 +12,28 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class StatusService {
 
-  private final LogRepository logRepository;
+  private final SessionRepository sessionRepository;
 
   private final Clock clock;
 
   public String currentStatus() {
-    var optionalLatest = logRepository.findFirstByOrderByTimestampDesc();
+    var optionalLatest = sessionRepository.findFirstByOrderByStartDesc();
     if (optionalLatest.isEmpty()) {
-      return "No logs in database.";
+      return "No sessions in database.";
     }
-
     var latest = optionalLatest.get();
 
-    if (latest.getKind() == Log.Kind.START) {
-      var start = latest.getTimestamp();
-      var end = OffsetDateTime.now(clock);
-      var duration = Duration.between(start, end);
-      var formattedDuration = formatDuration(duration);
+    var now = LocalDateTime.now(clock).atOffset(ZoneOffset.UTC);
+    var start = latest.getStart();
+    var end = latest.getEnd().orElse(now);
+
+    var duration = Duration.between(start, end);
+    var formattedDuration = formatDuration(duration);
+
+    if (latest.getEnd().isEmpty()) {
       return "In progress, " + formattedDuration + ".";
     }
 
-    var first2List = logRepository.findFirst2ByOrderByTimestampDesc();
-    if (first2List.size() != 2 || first2List.get(1).getKind() == Log.Kind.STOP) {
-      return "There is something wrong with the integrity of the log table.";
-    }
-
-    var secondLatest = first2List.get(1);
-
-    var start = secondLatest.getTimestamp();
-    var end = latest.getTimestamp();
-    var duration = Duration.between(start, end);
-    var formattedDuration = formatDuration(duration);
     return "Previous, " + formattedDuration + ".";
   }
 
