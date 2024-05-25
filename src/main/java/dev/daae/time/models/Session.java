@@ -26,8 +26,7 @@ public class Session {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NonNull
-  private OffsetDateTime start;
+  @NonNull private OffsetDateTime start;
 
   @Column(name = "_end")
   private OffsetDateTime end;

@@ -171,7 +171,8 @@ public class ControllerTests {
   }
 
   @Test
-  void currentStatusEndpointReturnsEmptyMessageWhenThereAreNoSessionsInTheDatabase() throws Exception {
+  void currentStatusEndpointReturnsEmptyMessageWhenThereAreNoSessionsInTheDatabase()
+      throws Exception {
     var result =
         this.mockMvc
             .perform(get("/status/current").with(httpBasic("username", "password")))
@@ -183,7 +184,9 @@ public class ControllerTests {
   @Test
   void testThatAllSessionsAreDeleted() throws Exception {
     var result =
-        this.mockMvc.perform(delete("/session").with(httpBasic("username", "password"))).andReturn();
+        this.mockMvc
+            .perform(delete("/session").with(httpBasic("username", "password")))
+            .andReturn();
     var responseBody = result.getResponse().getContentAsString();
     assertThat(responseBody).isEqualTo("All sessions deleted.");
     assertThat(sessionRepository.findAll()).isEmpty();

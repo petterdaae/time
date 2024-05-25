@@ -17,12 +17,7 @@ public class SessionRepositoryTests {
   @Test
   void testThatLogIsReturnedFromRepositoryAfterItIsSaved() {
     var now = LocalDateTime.now().atOffset(ZoneOffset.UTC);
-    var session =
-        repository.save(
-            Session.builder()
-                .start(now)
-                .end(now)
-                .build());
+    var session = repository.save(Session.builder().start(now).end(now).build());
     repository.findById(session.getId()).orElseThrow();
   }
 
