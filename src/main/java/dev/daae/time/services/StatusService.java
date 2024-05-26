@@ -16,6 +16,9 @@ public class StatusService {
 
   private final Clock clock;
 
+  private static final Duration ONE_WEEK_DURATION =
+      Duration.ofHours(37).plus(Duration.ofMinutes(30));
+
   public String currentStatus() {
     var optionalLatest = sessionRepository.findFirstByOrderByStartDesc();
     if (optionalLatest.isEmpty()) {
@@ -35,6 +38,25 @@ public class StatusService {
     }
 
     return "Previous, " + formattedDuration + ".";
+  }
+
+  public String weekStatus() {
+    var sessionsThisWeek = sessionRepository.findSessionsThisWeek();
+
+    var durationThisWeek =
+        sessionsThisWeek.stream()
+            .filter(session -> session.getEnd().isPresent())
+            .map(session -> Duration.between(session.getStart(), session.getEnd().get()))
+            .reduce(Duration.ZERO, Duration::plus);
+
+    var remainingDuration = ONE_WEEK_DURATION.minus(durationThisWeek);
+
+    var formattedDurationThisWeek = formatDuration(durationThisWeek);
+    var formattedRemainingDuration = formatDuration(remainingDuration);
+
+    return String.format(
+        "Finished sessions: %s\nRemaining: %s",
+        formattedDurationThisWeek, formattedRemainingDuration);
   }
 
   private String formatDuration(Duration duration) {

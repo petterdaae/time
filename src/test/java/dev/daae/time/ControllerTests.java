@@ -207,8 +207,7 @@ public class ControllerTests {
                 .header("Content-Type", "application/json")
                 .with(httpBasic("username", "password")))
         .andExpect(status().isOk())
-        .andExpect(content().string("Session start updated."))
-        .andReturn();
+        .andExpect(content().string("Session start updated."));
     var updatedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
     assertThat(updatedSession.getStart()).isEqualTo(editedStart);
   }
@@ -225,7 +224,30 @@ public class ControllerTests {
                 .header("Content-Type", "application/json")
                 .with(httpBasic("username", "password")))
         .andExpect(status().isOk())
-        .andExpect(content().string("Can not update session end until session has ended."))
-        .andReturn();
+        .andExpect(content().string("Can not update session end until session has ended."));
+  }
+
+  @Test
+  void testWeekStatus() throws Exception {
+    var now = LocalDateTime.of(2024, 5, 22, 20, 15).atOffset(ZoneOffset.UTC);
+    when(clock.instant()).thenReturn(now.toInstant());
+
+    var start = LocalDateTime.of(2024, 5, 20, 8, 0).atOffset(ZoneOffset.UTC);
+    var end = LocalDateTime.of(2024, 5, 20, 16, 0).atOffset(ZoneOffset.UTC);
+    var monday = Session.builder().start(start).end(end).build();
+    sessionRepository.save(monday);
+
+    start = LocalDateTime.of(2024, 5, 21, 8, 0).atOffset(ZoneOffset.UTC);
+    end = LocalDateTime.of(2024, 5, 21, 16, 3).atOffset(ZoneOffset.UTC);
+    var tuesday = Session.builder().start(start).end(end).build();
+    sessionRepository.save(tuesday);
+
+    this.mockMvc
+        .perform(get("/status/week").with(httpBasic("username", "password")))
+        .andExpect(status().isOk())
+        .andExpect(
+            content()
+                .string(
+                    "Finished sessions: 16 hours and 3 minutes\nRemaining: 21 hours and 27 minutes"));
   }
 }
