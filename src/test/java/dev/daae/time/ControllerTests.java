@@ -7,6 +7,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -190,5 +192,40 @@ public class ControllerTests {
     var responseBody = result.getResponse().getContentAsString();
     assertThat(responseBody).isEqualTo("All sessions deleted.");
     assertThat(sessionRepository.findAll()).isEmpty();
+  }
+
+  @Test
+  void testThatSessionStartIsUpdated() throws Exception {
+    var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
+    var editedStart = LocalDateTime.of(2020, 1, 1, 0, 5).atOffset(ZoneOffset.UTC);
+    var session = Session.builder().start(start).build();
+    sessionRepository.save(session);
+    this.mockMvc
+        .perform(
+            put("/session/start")
+                .content("{\"plus\":5}")
+                .header("Content-Type", "application/json")
+                .with(httpBasic("username", "password")))
+        .andExpect(status().isOk())
+        .andExpect(content().string("Session start updated."))
+        .andReturn();
+    var updatedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
+    assertThat(updatedSession.getStart()).isEqualTo(editedStart);
+  }
+
+  @Test
+  void testThatSessionEndIsNotUpdatedWhenSessionHasNotEnded() throws Exception {
+    var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
+    var session = Session.builder().start(start).build();
+    sessionRepository.save(session);
+    this.mockMvc
+        .perform(
+            put("/session/end")
+                .content("{\"plus\":5}")
+                .header("Content-Type", "application/json")
+                .with(httpBasic("username", "password")))
+        .andExpect(status().isOk())
+        .andExpect(content().string("Can not update session end until session has ended."))
+        .andReturn();
   }
 }

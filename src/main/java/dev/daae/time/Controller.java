@@ -50,4 +50,50 @@ public class Controller {
     sessionRepository.deleteAll();
     return "All sessions deleted.";
   }
+
+  @PutMapping("/session/start")
+  public String updateSessionStart(@RequestBody UpdateSessionRequest updateSessionRequest) {
+    var optionalSession = sessionRepository.findFirstByOrderByStartDesc();
+    if (optionalSession.isEmpty()) {
+      return "No session to update.";
+    }
+
+    var session = optionalSession.get();
+    var start = session.getStart();
+
+    var plus = updateSessionRequest.getPlus().orElse(0);
+    var minus = updateSessionRequest.getMinus().orElse(0);
+    start = start.plusMinutes(plus);
+    start = start.minusMinutes(minus);
+
+    session.setStart(start);
+    sessionRepository.save(session);
+
+    return "Session start updated.";
+  }
+
+  @PutMapping("/session/end")
+  public String updateSessionEnd(@RequestBody UpdateSessionRequest updateSessionRequest) {
+    var optionalSession = sessionRepository.findFirstByOrderByStartDesc();
+    if (optionalSession.isEmpty()) {
+      return "No session to update.";
+    }
+
+    var session = optionalSession.get();
+    var optionalEnd = session.getEnd();
+    if (optionalEnd.isEmpty()) {
+      return "Can not update session end until session has ended.";
+    }
+    var end = optionalEnd.get();
+
+    var plus = updateSessionRequest.getPlus().orElse(0);
+    var minus = updateSessionRequest.getMinus().orElse(0);
+    end = end.plusMinutes(plus);
+    end = end.minusMinutes(minus);
+
+    session.setEnd(end);
+    sessionRepository.save(session);
+
+    return "Session end updated.";
+  }
 }
