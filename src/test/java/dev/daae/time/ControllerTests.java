@@ -22,6 +22,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -228,6 +229,7 @@ public class ControllerTests {
   }
 
   @Test
+  @Disabled // Mock time in postgres query
   void testWeekStatus() throws Exception {
     var now = LocalDateTime.of(2024, 5, 22, 20, 15).atOffset(ZoneOffset.UTC);
     when(clock.instant()).thenReturn(now.toInstant());

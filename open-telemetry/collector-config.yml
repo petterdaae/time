@@ -1,0 +1,71 @@
+extensions:
+  basicauth/traces:
+    client_auth:
+      username: "${TEMPO_USERNAME}"
+      password: "${TEMPO_PASSWORD}"
+  basicauth/metrics:
+    client_auth:
+      username: "${PROM_USERNAME}"
+      password: "${PROM_PASSWORD}"
+  basicauth/logs:
+    client_auth:
+      username: "${LOKI_USERNAME}"
+      password: "${LOKI_PASSWORD}"
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+  attributes/metrics:
+    actions:
+      - action: insert
+        key: deployment.environment
+        value: "${DEPLOY_ENV}"
+      - key: "process_command_args"
+        action: "delete"
+  attributes/logs:
+    actions:
+      - action: insert
+        key: loki.attribute.labels
+        value: container
+      - action: insert
+        key: loki.format
+        value: raw
+
+exporters:
+  otlp:
+    endpoint: "${TEMPO_ENDPOINT}"
+    auth:
+      authenticator: basicauth/traces
+
+  prometheusremotewrite:
+    endpoint: "${PROM_ENDPOINT}"
+    auth:
+      authenticator: basicauth/metrics
+
+  loki:
+    endpoint: "${LOKI_ENDPOINT}"
+    auth:
+      authenticator: basicauth/logs
+
+service:
+  extensions: [ basicauth/traces, basicauth/metrics, basicauth/logs ]
+  pipelines:
+    traces:
+      receivers: [ otlp ]
+      processors: [ batch ]
+      exporters: [ otlp ]
+
+    metrics:
+      receivers: [ otlp ]
+      processors: [ batch,attributes/metrics ]
+      exporters: [ prometheusremotewrite ]
+
+    logs:
+      receivers: [ otlp ]
+      processors: [ batch,attributes/logs ]
+      exporters: [ loki ]
