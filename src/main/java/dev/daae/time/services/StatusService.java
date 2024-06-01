@@ -36,10 +36,10 @@ public class StatusService {
         var formattedDuration = formatDuration(duration);
 
         if (latest.getEnd().isEmpty()) {
-            return "In progress, " + formattedDuration + ".";
+            return "\uD83C\uDFE2 " + formattedDuration;
         }
 
-        return "Previous, " + formattedDuration + ".";
+        return "\uD83D\uDE0C " + formattedDuration;
     }
 
     public String weekStatus() {

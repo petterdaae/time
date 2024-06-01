@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 public interface SessionRepository extends JpaRepository<Session, Long> {
     Optional<Session> findFirstByOrderByStartDesc();
 
-    @Query(value = "select * from session where start >= date_trunc('week', cast(? as timestamptz))", nativeQuery = true)
+    @Query(
+        value = "select * from session where start >= date_trunc('week', cast(? as timestamptz))",
+        nativeQuery = true
+    )
     List<Session> findSessionsThisWeek(OffsetDateTime now);
 }
