@@ -17,25 +17,25 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 public class ExceptionHandlerTest {
 
-  @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-  @MockBean private SessionRepository sessionRepository;
+    @MockBean
+    private SessionRepository sessionRepository;
 
-  @Test
-  void statusEndpointReturns500WhenLogRepositoryThrowsException() throws Exception {
-    when(sessionRepository.findFirstByOrderByStartDesc()).thenThrow(new RuntimeException());
-    this.mockMvc
-        .perform(get("/status").with(httpBasic("username", "password")))
-        .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.error").value("Internal server error"));
-  }
+    @Test
+    void statusEndpointReturns500WhenLogRepositoryThrowsException() throws Exception {
+        when(sessionRepository.findFirstByOrderByStartDesc()).thenThrow(new RuntimeException());
+        this.mockMvc.perform(get("/status").with(httpBasic("username", "password")))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.error").value("Internal server error"));
+    }
 
-  @Test
-  void statusEndpointReturns500WhenLogRepositoryThrowsNullPointerException() throws Exception {
-    when(sessionRepository.findFirstByOrderByStartDesc()).thenThrow(new NullPointerException());
-    this.mockMvc
-        .perform(get("/status").with(httpBasic("username", "password")))
-        .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.error").value("Internal server error"));
-  }
+    @Test
+    void statusEndpointReturns500WhenLogRepositoryThrowsNullPointerException() throws Exception {
+        when(sessionRepository.findFirstByOrderByStartDesc()).thenThrow(new NullPointerException());
+        this.mockMvc.perform(get("/status").with(httpBasic("username", "password")))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.error").value("Internal server error"));
+    }
 }

@@ -22,20 +22,21 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 public class Session {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @NonNull private OffsetDateTime start;
+    @NonNull
+    private OffsetDateTime start;
 
-  @Column(name = "_end")
-  private OffsetDateTime end;
+    @Column(name = "_end")
+    private OffsetDateTime end;
 
-  public Optional<OffsetDateTime> getEnd() {
-    return Optional.ofNullable(end);
-  }
+    public Optional<OffsetDateTime> getEnd() {
+        return Optional.ofNullable(end);
+    }
 
-  public static Session newWithStartTime(OffsetDateTime start) {
-    return Session.builder().start(start).build();
-  }
+    public static Session newWithStartTime(OffsetDateTime start) {
+        return Session.builder().start(start).build();
+    }
 }

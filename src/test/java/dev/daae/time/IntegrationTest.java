@@ -13,4 +13,5 @@ import org.springframework.boot.test.context.SpringBootTest;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @AutoConfigureEmbeddedDatabase(provider = ZONKY)
-public @interface IntegrationTest {}
+public @interface IntegrationTest {
+}

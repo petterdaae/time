@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<InternalServerErrorResponse> handleException(Exception e) {
-    log.error(e.getMessage(), e);
-    return new ResponseEntity<>(
-        new InternalServerErrorResponse("Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
-  }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<InternalServerErrorResponse> handleException(Exception e) {
+        log.error(e.getMessage(), e);
+        return new ResponseEntity<>(
+            new InternalServerErrorResponse("Internal server error"),
+            HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
 }

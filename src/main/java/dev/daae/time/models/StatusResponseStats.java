@@ -7,5 +7,5 @@ import lombok.Value;
 @Builder
 public class StatusResponseStats {
 
-  String previous;
+    String previous;
 }

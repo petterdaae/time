@@ -8,7 +8,9 @@ import lombok.Value;
 @Builder
 public class StatusResponse {
 
-  @NonNull String status;
+    @NonNull
+    String status;
 
-  @NonNull StatusResponseStats stats;
+    @NonNull
+    StatusResponseStats stats;
 }

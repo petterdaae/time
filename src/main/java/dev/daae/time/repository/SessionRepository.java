@@ -7,11 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface SessionRepository extends JpaRepository<Session, Long> {
+    Optional<Session> findFirstByOrderByStartDesc();
 
-  Optional<Session> findFirstByOrderByStartDesc();
-
-  @Query(
-      value = "select * from session where start >= date_trunc('week', now())",
-      nativeQuery = true)
-  List<Session> findSessionsThisWeek();
+    @Query(value = "select * from session where start >= date_trunc('week', now())", nativeQuery = true)
+    List<Session> findSessionsThisWeek();
 }
