@@ -120,19 +120,19 @@ public class ControllerTests {
         when(clock.instant()).thenReturn(end.toInstant());
         var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
         var responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("In progress, 2 hours and 3 minutes.");
+        assertThat(responseBody).isEqualTo("In progress, 02:03.");
 
         end = LocalDateTime.of(2020, 1, 1, 2, 0).atOffset(ZoneOffset.UTC);
         when(clock.instant()).thenReturn(end.toInstant());
         result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
         responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("In progress, 2 hours.");
+        assertThat(responseBody).isEqualTo("In progress, 02:00.");
 
         end = LocalDateTime.of(2020, 1, 1, 0, 3).atOffset(ZoneOffset.UTC);
         when(clock.instant()).thenReturn(end.toInstant());
         result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
         responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("In progress, 3 minutes.");
+        assertThat(responseBody).isEqualTo("In progress, 00:03.");
     }
 
     @Test
@@ -142,14 +142,14 @@ public class ControllerTests {
         sessionRepository.save(Session.builder().start(start).end(end).build());
         var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
         var responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("Previous, 2 hours and 3 minutes.");
+        assertThat(responseBody).isEqualTo("Previous, 02:03.");
 
         start = LocalDateTime.of(2020, 1, 1, 5, 0).atOffset(ZoneOffset.UTC);
         end = LocalDateTime.of(2020, 1, 1, 8, 0).atOffset(ZoneOffset.UTC);
         sessionRepository.save(Session.builder().start(start).end(end).build());
         result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
         responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("Previous, 3 hours.");
+        assertThat(responseBody).isEqualTo("Previous, 03:00.");
     }
 
     @Test
@@ -217,8 +217,6 @@ public class ControllerTests {
 
         this.mockMvc.perform(get("/status/week").with(httpBasic("username", "password")))
             .andExpect(status().isOk())
-            .andExpect(
-                content().string("Finished sessions: 16 hours and 3 minutes\nRemaining: 21 hours and 27 minutes")
-            );
+            .andExpect(content().string("Finished sessions: 16:03\nRemaining: 21:27"));
     }
 }

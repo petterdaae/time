@@ -4,8 +4,11 @@ import dev.daae.time.repository.SessionRepository;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.util.StringUtil;
+import org.flywaydb.core.internal.util.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,7 +43,8 @@ public class StatusService {
     }
 
     public String weekStatus() {
-        var sessionsThisWeek = sessionRepository.findSessionsThisWeek();
+        var now = OffsetDateTime.now(clock);
+        var sessionsThisWeek = sessionRepository.findSessionsThisWeek(now);
 
         var durationThisWeek = sessionsThisWeek
             .stream()
@@ -61,24 +65,8 @@ public class StatusService {
     }
 
     private String formatDuration(Duration duration) {
-        var formattedDuration = "";
-
-        if (duration.toHours() != 0) {
-            formattedDuration += duration.toHours() + " hours";
-        }
-
-        if (duration.toMinutesPart() != 0) {
-            if (!formattedDuration.isEmpty()) {
-                formattedDuration += " and ";
-            }
-
-            formattedDuration += duration.toMinutesPart() + " minutes";
-        }
-
-        if (formattedDuration.isEmpty()) {
-            return "0 minutes";
-        }
-
-        return formattedDuration;
+        var hours = StringUtils.leftPad(Long.toString(duration.toHours()), 2, '0');
+        var minutes = StringUtils.leftPad(Integer.toString(duration.toMinutesPart()), 2, '0');
+        return hours + ":" + minutes;
     }
 }
