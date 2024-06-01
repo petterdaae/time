@@ -57,11 +57,7 @@ public class StatusService {
         var formattedDurationThisWeek = formatDuration(durationThisWeek);
         var formattedRemainingDuration = formatDuration(remainingDuration);
 
-        return String.format(
-            "Finished sessions: %s\nRemaining: %s",
-            formattedDurationThisWeek,
-            formattedRemainingDuration
-        );
+        return String.format("✅ %s\n⌛ %s", formattedDurationThisWeek, formattedRemainingDuration);
     }
 
     private String formatDuration(Duration duration) {

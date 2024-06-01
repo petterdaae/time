@@ -217,6 +217,6 @@ public class ControllerTests {
 
         this.mockMvc.perform(get("/status/week").with(httpBasic("username", "password")))
             .andExpect(status().isOk())
-            .andExpect(content().string("Finished sessions: 16:03\nRemaining: 21:27"));
+            .andExpect(content().string("✅ 16:03\n⌛ 21:27"));
     }
 }
