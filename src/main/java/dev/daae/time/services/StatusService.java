@@ -1,25 +1,19 @@
 package dev.daae.time.services;
 
 import dev.daae.time.repository.SessionRepository;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.util.StringUtil;
 import org.flywaydb.core.internal.util.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.time.*;
 
 @Service
 @RequiredArgsConstructor
 public class StatusService {
 
-    private final SessionRepository sessionRepository;
-
-    private final Clock clock;
-
     private static final Duration ONE_WEEK_DURATION = Duration.ofHours(37).plus(Duration.ofMinutes(30));
+    private final SessionRepository sessionRepository;
+    private final Clock clock;
 
     public String currentStatus() {
         var optionalLatest = sessionRepository.findFirstByOrderByStartDesc();
@@ -46,8 +40,7 @@ public class StatusService {
         var now = OffsetDateTime.now(clock);
         var sessionsThisWeek = sessionRepository.findSessionsThisWeek(now);
 
-        var durationThisWeek = sessionsThisWeek
-            .stream()
+        var durationThisWeek = sessionsThisWeek.stream()
             .filter(session -> session.getEnd().isPresent())
             .map(session -> Duration.between(session.getStart(), session.getEnd().get()))
             .reduce(Duration.ZERO, Duration::plus);
