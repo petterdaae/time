@@ -1,53 +1,53 @@
 plugins {
-	id 'java'
-	id 'io.freefair.lombok' version '8.6'
-	id 'org.springframework.boot' version '3.2.5'
-	id 'io.spring.dependency-management' version '1.1.5'
-	id 'com.diffplug.spotless' version '6.25.0'
+    id 'java'
+    id 'io.freefair.lombok' version '8.6'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.5'
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'dev.daae'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '21'
+    sourceCompatibility = '21'
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	// Dependencies managed by spring dependency management
-	implementation 'org.springframework.boot:spring-boot-starter'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.flywaydb:flyway-core'
-	implementation 'org.postgresql:postgresql'
+    // Dependencies managed by spring dependency management
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.postgresql:postgresql'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
 
-	// Dependencies not managed by spring dependency management
-	testImplementation 'io.zonky.test:embedded-database-spring-test:2.5.1'
-	testImplementation 'io.zonky.test:embedded-postgres:2.0.7'
+    // Dependencies not managed by spring dependency management
+    testImplementation 'io.zonky.test:embedded-database-spring-test:2.5.1'
+    testImplementation 'io.zonky.test:embedded-postgres:2.0.7'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 spotless {
-	java {
-		prettier([
-			'prettier': '3.0.3',
-			'prettier-plugin-java': '2.3.0'
-		]).config([
-			'parser': 'java',
-			'tabWidth': 4,
-			'printWidth': 120,
-			'plugins': ['prettier-plugin-java']
-		])
-	}
+    java {
+        prettier([
+                'prettier'            : '3.0.3',
+                'prettier-plugin-java': '2.3.0'
+        ]).config([
+                'parser'    : 'java',
+                'tabWidth'  : 4,
+                'printWidth': 120,
+                'plugins'   : ['prettier-plugin-java']
+        ])
+    }
 }
