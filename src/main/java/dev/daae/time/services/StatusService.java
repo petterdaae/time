@@ -1,11 +1,14 @@
 package dev.daae.time.services;
 
+import dev.daae.time.models.Session;
 import dev.daae.time.repository.SessionRepository;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.util.StringUtil;
 import org.flywaydb.core.internal.util.StringUtils;
@@ -52,12 +55,32 @@ public class StatusService {
             .map(session -> Duration.between(session.getStart(), session.getEnd().get()))
             .reduce(Duration.ZERO, Duration::plus);
 
+        var inProgressSession = inProgressSession();
+        if (inProgressSession.isPresent()) {
+            var duration = Duration.between(inProgressSession.get().getStart(), now);
+            durationThisWeek = durationThisWeek.minus(duration);
+        }
+
         var remainingDuration = ONE_WEEK_DURATION.minus(durationThisWeek);
 
         var formattedDurationThisWeek = formatDuration(durationThisWeek);
         var formattedRemainingDuration = formatDuration(remainingDuration);
 
         return String.format("✅ %s\n⌛ %s", formattedDurationThisWeek, formattedRemainingDuration);
+    }
+
+    private Optional<Session> inProgressSession() {
+        var optionalLatest = sessionRepository.findFirstByOrderByStartDesc();
+
+        if (optionalLatest.isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (optionalLatest.get().getEnd().isPresent()) {
+            return Optional.empty();
+        }
+
+        return optionalLatest;
     }
 
     private String formatDuration(Duration duration) {
