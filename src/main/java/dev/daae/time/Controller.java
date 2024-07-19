@@ -28,6 +28,11 @@ public class Controller {
         return statusService.weekStatus();
     }
 
+    @GetMapping("/status/today")
+    public String today() {
+        return statusService.todayStatus();
+    }
+
     @PostMapping("/session")
     @ResponseStatus(HttpStatus.CREATED)
     public String createLog() {

@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
@@ -45,22 +46,19 @@ public class StatusService {
         return "\uD83D\uDE0C " + formattedDuration;
     }
 
+    public String todayStatus() {
+        var now = OffsetDateTime.now(clock);
+        var sessionsToday = sessionRepository.findSessionsToday(now);
+        var duration = durationOfSessions(sessionsToday);
+        var formattedDuration = formatDuration(duration);
+        return formattedDuration;
+    }
+
     public String weekStatus() {
         var now = OffsetDateTime.now(clock);
         var sessionsThisWeek = sessionRepository.findSessionsThisWeek(now);
 
-        var durationThisWeek = sessionsThisWeek
-            .stream()
-            .filter(session -> session.getEnd().isPresent())
-            .map(session -> Duration.between(session.getStart(), session.getEnd().get()))
-            .reduce(Duration.ZERO, Duration::plus);
-
-        var inProgressSession = inProgressSession();
-        if (inProgressSession.isPresent()) {
-            var duration = Duration.between(inProgressSession.get().getStart(), now);
-            durationThisWeek = durationThisWeek.minus(duration);
-        }
-
+        var durationThisWeek = durationOfSessions(sessionsThisWeek);
         var remainingDuration = ONE_WEEK_DURATION.minus(durationThisWeek);
 
         var formattedDurationThisWeek = formatDuration(durationThisWeek);
@@ -69,18 +67,21 @@ public class StatusService {
         return String.format("✅ %s\n⌛ %s", formattedDurationThisWeek, formattedRemainingDuration);
     }
 
-    private Optional<Session> inProgressSession() {
-        var optionalLatest = sessionRepository.findFirstByOrderByStartDesc();
+    private Duration durationOfSessions(List<Session> sessions) {
+        var completedDuration = sessions
+                .stream()
+                .filter(session -> session.getEnd().isPresent())
+                .map(session -> Duration.between(session.getStart(), session.getEnd().get()))
+                .reduce(Duration.ZERO, Duration::plus);
 
-        if (optionalLatest.isEmpty()) {
-            return Optional.empty();
-        }
+        var now = OffsetDateTime.now(clock);
+        var inProgressDuration = sessions
+                .stream()
+                .filter(session -> session.getEnd().isEmpty())
+                .map(session -> Duration.between(session.getStart(), now))
+                .reduce(Duration.ZERO, Duration::plus);
 
-        if (optionalLatest.get().getEnd().isPresent()) {
-            return Optional.empty();
-        }
-
-        return optionalLatest;
+        return completedDuration.plus(inProgressDuration);
     }
 
     private String formatDuration(Duration duration) {
