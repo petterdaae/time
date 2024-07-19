@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.util.StringUtil;
 import org.flywaydb.core.internal.util.StringUtils;
@@ -69,17 +68,17 @@ public class StatusService {
 
     private Duration durationOfSessions(List<Session> sessions) {
         var completedDuration = sessions
-                .stream()
-                .filter(session -> session.getEnd().isPresent())
-                .map(session -> Duration.between(session.getStart(), session.getEnd().get()))
-                .reduce(Duration.ZERO, Duration::plus);
+            .stream()
+            .filter(session -> session.getEnd().isPresent())
+            .map(session -> Duration.between(session.getStart(), session.getEnd().get()))
+            .reduce(Duration.ZERO, Duration::plus);
 
         var now = OffsetDateTime.now(clock);
         var inProgressDuration = sessions
-                .stream()
-                .filter(session -> session.getEnd().isEmpty())
-                .map(session -> Duration.between(session.getStart(), now))
-                .reduce(Duration.ZERO, Duration::plus);
+            .stream()
+            .filter(session -> session.getEnd().isEmpty())
+            .map(session -> Duration.between(session.getStart(), now))
+            .reduce(Duration.ZERO, Duration::plus);
 
         return completedDuration.plus(inProgressDuration);
     }
