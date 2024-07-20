@@ -1,4 +1,4 @@
-package dev.daae.time.repository;
+package dev.daae.time.repositories;
 
 import dev.daae.time.models.Session;
 import java.time.OffsetDateTime;

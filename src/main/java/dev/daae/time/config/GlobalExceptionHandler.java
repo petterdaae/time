@@ -1,4 +1,4 @@
-package dev.daae.time;
+package dev.daae.time.config;
 
 import dev.daae.time.models.InternalServerErrorResponse;
 import lombok.extern.slf4j.Slf4j;

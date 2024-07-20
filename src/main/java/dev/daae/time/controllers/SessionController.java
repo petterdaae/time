@@ -1,7 +1,7 @@
-package dev.daae.time;
+package dev.daae.time.controllers;
 
 import dev.daae.time.models.*;
-import dev.daae.time.repository.SessionRepository;
+import dev.daae.time.repositories.SessionRepository;
 import dev.daae.time.services.StatusService;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -12,28 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-public class Controller {
-
-    private final StatusService statusService;
+@RequestMapping("/session")
+public class SessionController {
 
     private final SessionRepository sessionRepository;
 
-    @GetMapping("/status/current")
-    public String currentStatus() {
-        return statusService.currentStatus();
-    }
-
-    @GetMapping("/status/week")
-    public String currentWeek() {
-        return statusService.weekStatus();
-    }
-
-    @GetMapping("/status/today")
-    public String today() {
-        return statusService.todayStatus();
-    }
-
-    @PostMapping("/session")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public String createLog() {
         var session = sessionRepository.findFirstByOrderByStartDesc();
@@ -50,18 +34,13 @@ public class Controller {
         return "Stopped.";
     }
 
-    @GetMapping("/session")
-    public List<Session> getAllSessions() {
-        return sessionRepository.findAll();
-    }
-
-    @DeleteMapping("/session")
+    @DeleteMapping
     public String deleteAllSessions() {
         sessionRepository.deleteAll();
         return "All sessions deleted.";
     }
 
-    @PutMapping("/session/start")
+    @PutMapping("/start")
     public String updateSessionStart(@RequestBody UpdateSessionRequest updateSessionRequest) {
         var optionalSession = sessionRepository.findFirstByOrderByStartDesc();
         if (optionalSession.isEmpty()) {
@@ -82,7 +61,7 @@ public class Controller {
         return "Session start updated.";
     }
 
-    @PutMapping("/session/end")
+    @PutMapping("/end")
     public String updateSessionEnd(@RequestBody UpdateSessionRequest updateSessionRequest) {
         var optionalSession = sessionRepository.findFirstByOrderByStartDesc();
         if (optionalSession.isEmpty()) {

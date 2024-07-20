@@ -1,4 +1,4 @@
-package dev.daae.time;
+package dev.daae.time.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

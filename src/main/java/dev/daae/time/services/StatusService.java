@@ -1,16 +1,15 @@
 package dev.daae.time.services;
 
 import dev.daae.time.models.Session;
-import dev.daae.time.repository.SessionRepository;
+import dev.daae.time.repositories.SessionRepository;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.util.StringUtil;
 import org.flywaydb.core.internal.util.StringUtils;
 import org.springframework.stereotype.Service;
 

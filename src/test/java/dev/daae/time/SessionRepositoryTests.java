@@ -3,7 +3,7 @@ package dev.daae.time;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.daae.time.models.Session;
-import dev.daae.time.repository.SessionRepository;
+import dev.daae.time.repositories.SessionRepository;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;

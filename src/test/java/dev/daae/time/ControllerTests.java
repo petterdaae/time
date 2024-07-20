@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.daae.time.models.Session;
-import dev.daae.time.repository.SessionRepository;
+import dev.daae.time.repositories.SessionRepository;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -97,17 +97,6 @@ public class ControllerTests {
         var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
         assertThat(savedSession.getStart()).isNotNull();
         assertThat(savedSession.getEnd()).isPresent();
-    }
-
-    @Test
-    void logEndpointReturnsCorrectAmountOfLogs() throws Exception {
-        var sessionBuilder = Session.builder().start(OffsetDateTime.now());
-        for (int i = 0; i < 5; i++) {
-            sessionRepository.save(sessionBuilder.build());
-        }
-        this.mockMvc.perform(get("/session").with(csrf()).with(httpBasic("username", "password")))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(5));
     }
 
     @Test
