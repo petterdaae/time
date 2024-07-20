@@ -1,7 +1,6 @@
 package dev.daae.time.controllers;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -16,6 +15,7 @@ import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class SessionControllerTest extends IntegrationTest {
@@ -30,12 +30,8 @@ class SessionControllerTest extends IntegrationTest {
 
     @Test
     void sessionEndpointCreatesSessionInDatabase() throws Exception {
-        var result =
-            this.mockMvc.perform(
-                    post("/session").with(httpBasic("username", "password")).contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isCreated())
-                .andReturn();
+        var request = post("/session").with(validCredentials()).contentType(MediaType.APPLICATION_JSON);
+        var result = this.mockMvc.perform(request).andExpect(status().isCreated()).andReturn();
         var responseBody = result.getResponse().getContentAsString();
         assertThat(responseBody).isEqualTo("Started.");
         var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
@@ -47,12 +43,8 @@ class SessionControllerTest extends IntegrationTest {
     void logEndpointSetsStopKindIfPreviousKindWasStart() throws Exception {
         var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
         sessionRepository.save(Session.builder().start(start).build());
-        var result =
-            this.mockMvc.perform(
-                    post("/session").with(httpBasic("username", "password")).contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isCreated())
-                .andReturn();
+        var request = post("/session").with(validCredentials()).contentType(MediaType.APPLICATION_JSON);
+        var result = this.mockMvc.perform(request).andExpect(status().isCreated()).andReturn();
         var responseBody = result.getResponse().getContentAsString();
         assertThat(responseBody).isEqualTo("Stopped.");
         var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
@@ -62,7 +54,8 @@ class SessionControllerTest extends IntegrationTest {
 
     @Test
     void testThatAllSessionsAreDeleted() throws Exception {
-        var result = this.mockMvc.perform(delete("/session").with(httpBasic("username", "password"))).andReturn();
+        var request = delete("/session").with(validCredentials());
+        var result = this.mockMvc.perform(request).andReturn();
         var responseBody = result.getResponse().getContentAsString();
         assertThat(responseBody).isEqualTo("All sessions deleted.");
         assertThat(sessionRepository.findAll()).isEmpty();
@@ -77,8 +70,8 @@ class SessionControllerTest extends IntegrationTest {
         this.mockMvc.perform(
                 put("/session/start")
                     .content("{\"plus\":5}")
-                    .header("Content-Type", "application/json")
-                    .with(httpBasic("username", "password"))
+                    .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                    .with(validCredentials())
             )
             .andExpect(status().isOk())
             .andExpect(content().string("Session start updated."));
@@ -94,8 +87,8 @@ class SessionControllerTest extends IntegrationTest {
         this.mockMvc.perform(
                 put("/session/end")
                     .content("{\"plus\":5}")
-                    .header("Content-Type", "application/json")
-                    .with(httpBasic("username", "password"))
+                    .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                    .with(validCredentials())
             )
             .andExpect(status().isOk())
             .andExpect(content().string("Can not update session end until session has ended."));

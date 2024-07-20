@@ -33,7 +33,8 @@ class StatusControllerTest extends IntegrationTest {
 
     @Test
     void currentStatusEndpointReturns200WithValidCredentials() throws Exception {
-        this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andExpect(status().isOk());
+        var request = get("/status/current").with(validCredentials());
+        this.mockMvc.perform(request).andExpect(status().isOk());
     }
 
     @Test
@@ -43,8 +44,8 @@ class StatusControllerTest extends IntegrationTest {
 
     @Test
     void currentStatusEndpointReturns401WithInvalidCredentials() throws Exception {
-        this.mockMvc.perform(get("/status/current").with(httpBasic("invalid", "credentials")))
-            .andExpect(status().isUnauthorized());
+        var request = get("/status/current").with(httpBasic("invalid", "credentials"));
+        this.mockMvc.perform(request).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -53,23 +54,20 @@ class StatusControllerTest extends IntegrationTest {
         sessionRepository.save(Session.builder().start(start).build());
         when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
 
-        var end = LocalDateTime.of(2020, 1, 1, 2, 3).atOffset(ZoneOffset.UTC);
-        when(clock.instant()).thenReturn(end.toInstant());
-        var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
-        var responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("\uD83C\uDFE2 02:03");
+        mockClock(2020, 1, 1, 2, 3);
+        var request = get("/status/current").with(validCredentials());
+        var result = this.mockMvc.perform(request).andReturn().getResponse().getContentAsString();
+        assertThat(result).isEqualTo("\uD83C\uDFE2 02:03");
 
-        end = LocalDateTime.of(2020, 1, 1, 2, 0).atOffset(ZoneOffset.UTC);
-        when(clock.instant()).thenReturn(end.toInstant());
-        result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
-        responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("\uD83C\uDFE2 02:00");
+        mockClock(2020, 1, 1, 2, 0);
+        request = get("/status/current").with(validCredentials());
+        result = this.mockMvc.perform(request).andReturn().getResponse().getContentAsString();
+        assertThat(result).isEqualTo("\uD83C\uDFE2 02:00");
 
-        end = LocalDateTime.of(2020, 1, 1, 0, 3).atOffset(ZoneOffset.UTC);
-        when(clock.instant()).thenReturn(end.toInstant());
-        result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
-        responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("\uD83C\uDFE2 00:03");
+        mockClock(2020, 1, 1, 0, 3);
+        request = get("/status/current").with(validCredentials());
+        result = this.mockMvc.perform(request).andReturn().getResponse().getContentAsString();
+        assertThat(result).isEqualTo("\uD83C\uDFE2 00:03");
     }
 
     @Test
@@ -77,29 +75,33 @@ class StatusControllerTest extends IntegrationTest {
         var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
         var end = LocalDateTime.of(2020, 1, 1, 2, 3).atOffset(ZoneOffset.UTC);
         sessionRepository.save(Session.builder().start(start).end(end).build());
-        var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+
+        var request = get("/status/current").with(validCredentials());
+        var result = this.mockMvc.perform(request).andReturn();
         var responseBody = result.getResponse().getContentAsString();
         assertThat(responseBody).isEqualTo("\uD83D\uDE0C 02:03");
 
         start = LocalDateTime.of(2020, 1, 1, 5, 0).atOffset(ZoneOffset.UTC);
         end = LocalDateTime.of(2020, 1, 1, 8, 0).atOffset(ZoneOffset.UTC);
         sessionRepository.save(Session.builder().start(start).end(end).build());
-        result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+
+        request = get("/status/current").with(validCredentials());
+        result = this.mockMvc.perform(request).andReturn();
         responseBody = result.getResponse().getContentAsString();
         assertThat(responseBody).isEqualTo("\uD83D\uDE0C 03:00");
     }
 
     @Test
     void currentStatusEndpointReturnsEmptyMessageWhenThereAreNoSessionsInTheDatabase() throws Exception {
-        var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
+        var request = get("/status/current").with(validCredentials());
+        var result = this.mockMvc.perform(request).andReturn();
         var responseBody = result.getResponse().getContentAsString();
         assertThat(responseBody).isEqualTo("No sessions in database.");
     }
 
     @Test
     void testWeekStatus() throws Exception {
-        var now = LocalDateTime.of(2024, 5, 22, 20, 15).atOffset(ZoneOffset.UTC);
-        when(clock.instant()).thenReturn(now.toInstant());
+        mockClock(2024, 5, 22, 20, 15);
 
         var start = LocalDateTime.of(2024, 5, 20, 8, 0).atOffset(ZoneOffset.UTC);
         var end = LocalDateTime.of(2024, 5, 20, 16, 0).atOffset(ZoneOffset.UTC);
@@ -111,8 +113,12 @@ class StatusControllerTest extends IntegrationTest {
         var tuesday = Session.builder().start(start).end(end).build();
         sessionRepository.save(tuesday);
 
-        this.mockMvc.perform(get("/status/week").with(httpBasic("username", "password")))
-            .andExpect(status().isOk())
-            .andExpect(content().string("✅ 16:03\n⌛ 21:27"));
+        var request = get("/status/week").with(validCredentials());
+        this.mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().string("✅ 16:03\n⌛ 21:27"));
+    }
+
+    private void mockClock(int year, int month, int day, int hour, int minute) {
+        var time = LocalDateTime.of(year, month, day, hour, minute).atOffset(ZoneOffset.UTC);
+        when(clock.instant()).thenReturn(time.toInstant());
     }
 }
