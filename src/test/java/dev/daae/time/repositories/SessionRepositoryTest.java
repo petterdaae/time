@@ -1,16 +1,15 @@
-package dev.daae.time;
+package dev.daae.time.repositories;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.daae.time.IntegrationTest;
 import dev.daae.time.models.Session;
-import dev.daae.time.repositories.SessionRepository;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@IntegrationTest
-public class SessionRepositoryTests {
+class SessionRepositoryTest extends IntegrationTest {
 
     @Autowired
     private SessionRepository repository;

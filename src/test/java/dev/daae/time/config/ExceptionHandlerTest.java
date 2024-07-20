@@ -1,4 +1,4 @@
-package dev.daae.time;
+package dev.daae.time.config;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import dev.daae.time.IntegrationTest;
 import dev.daae.time.repositories.SessionRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@IntegrationTest
 @AutoConfigureMockMvc
-public class ExceptionHandlerTest {
+class ExceptionHandlerTest extends IntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

@@ -5,3 +5,8 @@ spring:
     user:
       name: username
       password: password
+  datasource:
+    # url: jdbc:postgresql://time-db.flycast:5432/time?sslmode=disable
+    # username: time
+    # password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver

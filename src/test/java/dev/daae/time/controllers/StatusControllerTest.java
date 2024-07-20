@@ -1,48 +1,28 @@
-package dev.daae.time;
+package dev.daae.time.controllers;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.daae.time.IntegrationTest;
 import dev.daae.time.models.Session;
 import dev.daae.time.repositories.SessionRepository;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 
-@IntegrationTest
-@AutoConfigureMockMvc
-public class ControllerTests {
-
-    @Autowired
-    private MockMvc mockMvc;
+class StatusControllerTest extends IntegrationTest {
 
     @Autowired
     private SessionRepository sessionRepository;
 
     @MockBean
     private Clock clock;
-
-    private final ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     public void setup() {
@@ -65,38 +45,6 @@ public class ControllerTests {
     void currentStatusEndpointReturns401WithInvalidCredentials() throws Exception {
         this.mockMvc.perform(get("/status/current").with(httpBasic("invalid", "credentials")))
             .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void sessionEndpointCreatesSessionInDatabase() throws Exception {
-        var result =
-            this.mockMvc.perform(
-                    post("/session").with(httpBasic("username", "password")).contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isCreated())
-                .andReturn();
-        var responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("Started.");
-        var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
-        assertThat(savedSession.getStart()).isNotNull();
-        assertThat(savedSession.getEnd()).isEmpty();
-    }
-
-    @Test
-    void logEndpointSetsStopKindIfPreviousKindWasStart() throws Exception {
-        var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
-        sessionRepository.save(Session.builder().start(start).build());
-        var result =
-            this.mockMvc.perform(
-                    post("/session").with(httpBasic("username", "password")).contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isCreated())
-                .andReturn();
-        var responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("Stopped.");
-        var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
-        assertThat(savedSession.getStart()).isNotNull();
-        assertThat(savedSession.getEnd()).isPresent();
     }
 
     @Test
@@ -146,47 +94,6 @@ public class ControllerTests {
         var result = this.mockMvc.perform(get("/status/current").with(httpBasic("username", "password"))).andReturn();
         var responseBody = result.getResponse().getContentAsString();
         assertThat(responseBody).isEqualTo("No sessions in database.");
-    }
-
-    @Test
-    void testThatAllSessionsAreDeleted() throws Exception {
-        var result = this.mockMvc.perform(delete("/session").with(httpBasic("username", "password"))).andReturn();
-        var responseBody = result.getResponse().getContentAsString();
-        assertThat(responseBody).isEqualTo("All sessions deleted.");
-        assertThat(sessionRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    void testThatSessionStartIsUpdated() throws Exception {
-        var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
-        var editedStart = LocalDateTime.of(2020, 1, 1, 0, 5).atOffset(ZoneOffset.UTC);
-        var session = Session.builder().start(start).build();
-        sessionRepository.save(session);
-        this.mockMvc.perform(
-                put("/session/start")
-                    .content("{\"plus\":5}")
-                    .header("Content-Type", "application/json")
-                    .with(httpBasic("username", "password"))
-            )
-            .andExpect(status().isOk())
-            .andExpect(content().string("Session start updated."));
-        var updatedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
-        assertThat(updatedSession.getStart()).isEqualTo(editedStart);
-    }
-
-    @Test
-    void testThatSessionEndIsNotUpdatedWhenSessionHasNotEnded() throws Exception {
-        var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
-        var session = Session.builder().start(start).build();
-        sessionRepository.save(session);
-        this.mockMvc.perform(
-                put("/session/end")
-                    .content("{\"plus\":5}")
-                    .header("Content-Type", "application/json")
-                    .with(httpBasic("username", "password"))
-            )
-            .andExpect(status().isOk())
-            .andExpect(content().string("Can not update session end until session has ended."));
     }
 
     @Test

@@ -2,10 +2,8 @@ package dev.daae.time.controllers;
 
 import dev.daae.time.models.*;
 import dev.daae.time.repositories.SessionRepository;
-import dev.daae.time.services.StatusService;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
