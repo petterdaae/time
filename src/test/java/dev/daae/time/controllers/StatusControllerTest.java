@@ -114,7 +114,7 @@ class StatusControllerTest extends IntegrationTest {
         sessionRepository.save(tuesday);
 
         var request = get("/status/week").with(validCredentials());
-        this.mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().string("✅ 16:03\n⌛ 21:27"));
+        this.mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().string("✅ 16:03\n⌛ 23:57"));
     }
 
     private void mockClock(int year, int month, int day, int hour, int minute) {

@@ -20,7 +20,7 @@ public class StatusService {
 
     private final Clock clock;
 
-    private static final Duration ONE_WEEK_DURATION = Duration.ofHours(37).plus(Duration.ofMinutes(30));
+    private static final Duration ONE_WEEK_DURATION = Duration.ofHours(40);
 
     public String currentStatus() {
         var optionalLatest = sessionRepository.findFirstByOrderByStartDesc();
