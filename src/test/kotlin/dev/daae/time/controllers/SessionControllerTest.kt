@@ -19,9 +19,8 @@ internal class SessionControllerTest(
     @Autowired
     private val sessionRepository: SessionRepository,
     @Autowired
-    private val mockMvc: MockMvc
+    private val mockMvc: MockMvc,
 ) : dev.daae.time.IntegrationTest() {
-
     @BeforeEach
     fun beforeEach() {
         sessionRepository!!.deleteAll()
@@ -76,7 +75,7 @@ internal class SessionControllerTest(
             MockMvcRequestBuilders.put("/session/start")
                 .content("{\"plus\":5}")
                 .header(HttpHeaders.CONTENT_TYPE, "application/json")
-                .with(validCredentials())
+                .with(validCredentials()),
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().string("Session start updated."))
@@ -94,7 +93,7 @@ internal class SessionControllerTest(
             MockMvcRequestBuilders.put("/session/end")
                 .content("{\"plus\":5}")
                 .header(HttpHeaders.CONTENT_TYPE, "application/json")
-                .with(validCredentials())
+                .with(validCredentials()),
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().string("Can not update session end until session has ended."))

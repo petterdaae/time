@@ -24,7 +24,6 @@ internal class StatusControllerTest(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val sessionRepository: SessionRepository,
 ) : IntegrationTest() {
-
     @MockBean private var clock: Clock? = null
 
     @BeforeEach
@@ -51,8 +50,9 @@ internal class StatusControllerTest(
     @Test
     @Throws(Exception::class)
     fun currentStatusEndpointReturns401WithInvalidCredentials() {
-        val request = MockMvcRequestBuilders.get("/status/current")
-            .with(SecurityMockMvcRequestPostProcessors.httpBasic("invalid", "credentials"))
+        val request =
+            MockMvcRequestBuilders.get("/status/current")
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic("invalid", "credentials"))
         this.mockMvc.perform(request).andExpect(MockMvcResultMatchers.status().isUnauthorized())
     }
 
@@ -130,7 +130,13 @@ internal class StatusControllerTest(
             .andExpect(MockMvcResultMatchers.content().string("✅ 16:03\n⌛ 23:57"))
     }
 
-    private fun mockClock(year: Int, month: Int, day: Int, hour: Int, minute: Int) {
+    private fun mockClock(
+        year: Int,
+        month: Int,
+        day: Int,
+        hour: Int,
+        minute: Int,
+    ) {
         val time = LocalDateTime.of(year, month, day, hour, minute).atOffset(ZoneOffset.UTC)
         Mockito.`when`<Instant?>(clock!!.instant()).thenReturn(time.toInstant())
     }

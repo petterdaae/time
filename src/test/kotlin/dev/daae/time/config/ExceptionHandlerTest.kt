@@ -30,7 +30,7 @@ internal class ExceptionHandlerTest() : IntegrationTest() {
         Mockito.`when`<Session?>(sessionRepository!!.findFirstByOrderByStartDesc()).thenThrow(RuntimeException())
         this.mockMvc!!.perform(
             MockMvcRequestBuilders.get("/status")
-                .with(SecurityMockMvcRequestPostProcessors.httpBasic("username", "password"))
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic("username", "password")),
         )
             .andExpect(MockMvcResultMatchers.status().isInternalServerError())
             .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("Internal server error"))
@@ -42,7 +42,7 @@ internal class ExceptionHandlerTest() : IntegrationTest() {
         Mockito.`when`<Session?>(sessionRepository!!.findFirstByOrderByStartDesc()).thenThrow(NullPointerException())
         this.mockMvc!!.perform(
             MockMvcRequestBuilders.get("/status")
-                .with(SecurityMockMvcRequestPostProcessors.httpBasic("username", "password"))
+                .with(SecurityMockMvcRequestPostProcessors.httpBasic("username", "password")),
         )
             .andExpect(MockMvcResultMatchers.status().isInternalServerError())
             .andExpect(MockMvcResultMatchers.jsonPath("$.error").value("Internal server error"))

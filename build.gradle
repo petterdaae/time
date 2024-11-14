@@ -31,4 +31,8 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-spotless {}
+spotless {
+	kotlin {
+		ktlint()
+	}
+}

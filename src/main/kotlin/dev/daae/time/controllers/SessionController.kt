@@ -18,10 +18,9 @@ import java.time.ZoneOffset
 
 @RestController
 @RequestMapping("/session")
-class SessionController (
-    private val sessionRepository: SessionRepository
+class SessionController(
+    private val sessionRepository: SessionRepository,
 ) {
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createLog(): String {
@@ -46,7 +45,9 @@ class SessionController (
     }
 
     @PutMapping("/start")
-    fun updateSessionStart(@RequestBody updateSessionRequest: UpdateSessionRequest): String {
+    fun updateSessionStart(
+        @RequestBody updateSessionRequest: UpdateSessionRequest,
+    ): String {
         val session = sessionRepository!!.findFirstByOrderByStartDesc()
         if (session == null) {
             return "No session to update."
@@ -66,7 +67,9 @@ class SessionController (
     }
 
     @PutMapping("/end")
-    fun updateSessionEnd(@RequestBody updateSessionRequest: UpdateSessionRequest): String {
+    fun updateSessionEnd(
+        @RequestBody updateSessionRequest: UpdateSessionRequest,
+    ): String {
         val session = sessionRepository!!.findFirstByOrderByStartDesc()
         if (session == null) {
             return "No session to update."

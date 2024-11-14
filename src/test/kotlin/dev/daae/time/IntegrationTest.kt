@@ -15,7 +15,6 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 abstract class IntegrationTest {
-
     fun validCredentials(): RequestPostProcessor {
         return SecurityMockMvcRequestPostProcessors.httpBasic("username", "password")
     }

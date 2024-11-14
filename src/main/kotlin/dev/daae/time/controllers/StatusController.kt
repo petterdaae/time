@@ -8,9 +8,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/status")
 class StatusController(
-    private val statusService: StatusService
+    private val statusService: StatusService,
 ) {
-
     @GetMapping("/current")
     fun currentStatus(): String {
         return statusService!!.currentStatus()

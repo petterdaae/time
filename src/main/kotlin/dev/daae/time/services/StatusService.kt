@@ -11,11 +11,10 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 @Service
-class StatusService (
+class StatusService(
     private val sessionRepository: SessionRepository,
-    private val clock: Clock
+    private val clock: Clock,
 ) {
-
     fun currentStatus(): String {
         val latest = sessionRepository.findFirstByOrderByStartDesc()
         if (latest == null) {
@@ -58,18 +57,20 @@ class StatusService (
     }
 
     private fun durationOfSessions(sessions: MutableList<Session?>): Duration {
-        val completedDuration = sessions
-            .stream()
-            .filter { session: Session? -> session!!.end != null }
-            .map<Duration> { session: Session? -> Duration.between(session!!.start, session.end) }
-            .reduce(Duration.ZERO) { obj: Duration?, duration: Duration? -> obj!!.plus(duration) }
+        val completedDuration =
+            sessions
+                .stream()
+                .filter { session: Session? -> session!!.end != null }
+                .map<Duration> { session: Session? -> Duration.between(session!!.start, session.end) }
+                .reduce(Duration.ZERO) { obj: Duration?, duration: Duration? -> obj!!.plus(duration) }
 
         val now = OffsetDateTime.now(clock)
-        val inProgressDuration = sessions
-            .stream()
-            .filter { session: Session? -> session!!.end == null }
-            .map<Duration> { session: Session? -> Duration.between(session!!.start, now) }
-            .reduce(Duration.ZERO) { obj: Duration?, duration: Duration? -> obj!!.plus(duration) }
+        val inProgressDuration =
+            sessions
+                .stream()
+                .filter { session: Session? -> session!!.end == null }
+                .map<Duration> { session: Session? -> Duration.between(session!!.start, now) }
+                .reduce(Duration.ZERO) { obj: Duration?, duration: Duration? -> obj!!.plus(duration) }
 
         return completedDuration.plus(inProgressDuration)
     }

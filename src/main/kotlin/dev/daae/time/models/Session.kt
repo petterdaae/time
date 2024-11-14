@@ -8,15 +8,13 @@ import jakarta.persistence.Id
 import java.time.OffsetDateTime
 
 @Entity
-class Session (
+class Session(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-
     var start: OffsetDateTime? = null,
-
     @Column(name = "_end")
-    var end: OffsetDateTime? = null
+    var end: OffsetDateTime? = null,
 ) {
     companion object {
         @JvmStatic

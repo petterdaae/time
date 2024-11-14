@@ -10,7 +10,6 @@ import java.lang.Exception
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
-
     private val logger = KotlinLogging.logger {}
 
     @ExceptionHandler(Exception::class)
@@ -18,7 +17,7 @@ class GlobalExceptionHandler {
         logger.error(e) { e.message }
         return ResponseEntity<InternalServerErrorResponse?>(
             InternalServerErrorResponse("Internal server error"),
-            HttpStatus.INTERNAL_SERVER_ERROR
+            HttpStatus.INTERNAL_SERVER_ERROR,
         )
     }
 }

@@ -13,7 +13,6 @@ import java.lang.Exception
 @Configuration
 @EnableWebSecurity
 open class SecurityConfig {
-
     @Bean
     @Throws(Exception::class)
     open fun securityFilterChain(http: HttpSecurity): SecurityFilterChain? {
