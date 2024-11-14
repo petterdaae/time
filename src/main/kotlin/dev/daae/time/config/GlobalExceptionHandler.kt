@@ -2,14 +2,12 @@ package dev.daae.time.config
 
 import dev.daae.time.models.InternalServerErrorResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
-import lombok.extern.slf4j.Slf4j
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.lang.Exception
 
-@Slf4j
 @RestControllerAdvice
 class GlobalExceptionHandler {
 

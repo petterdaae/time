@@ -4,7 +4,6 @@ import dev.daae.time.models.Session
 import dev.daae.time.models.Session.Companion.newWithStartTime
 import dev.daae.time.models.UpdateSessionRequest
 import dev.daae.time.repositories.SessionRepository
-import lombok.RequiredArgsConstructor
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -18,7 +17,6 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/session")
 class SessionController (
     private val sessionRepository: SessionRepository

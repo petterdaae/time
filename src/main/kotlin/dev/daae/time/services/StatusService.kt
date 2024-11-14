@@ -2,7 +2,6 @@ package dev.daae.time.services
 
 import dev.daae.time.models.Session
 import dev.daae.time.repositories.SessionRepository
-import lombok.RequiredArgsConstructor
 import org.flywaydb.core.internal.util.StringUtils
 import org.springframework.stereotype.Service
 import java.time.Clock
@@ -12,7 +11,6 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 @Service
-@RequiredArgsConstructor
 class StatusService (
     private val sessionRepository: SessionRepository,
     private val clock: Clock
