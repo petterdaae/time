@@ -34,7 +34,7 @@ class SessionControllerTest extends IntegrationTest {
         var result = this.mockMvc.perform(request).andExpect(status().isCreated()).andReturn();
         var responseBody = result.getResponse().getContentAsString();
         assertThat(responseBody).isEqualTo("Started.");
-        var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
+        var savedSession = sessionRepository.findFirstByOrderByStartDesc();
         assertThat(savedSession.getStart()).isNotNull();
         assertThat(savedSession.getEnd()).isNull();
     }
@@ -47,7 +47,7 @@ class SessionControllerTest extends IntegrationTest {
         var result = this.mockMvc.perform(request).andExpect(status().isCreated()).andReturn();
         var responseBody = result.getResponse().getContentAsString();
         assertThat(responseBody).isEqualTo("Stopped.");
-        var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
+        var savedSession = sessionRepository.findFirstByOrderByStartDesc();
         assertThat(savedSession.getStart()).isNotNull();
         assertThat(savedSession.getEnd()).isNotNull();
     }
@@ -75,7 +75,7 @@ class SessionControllerTest extends IntegrationTest {
             )
             .andExpect(status().isOk())
             .andExpect(content().string("Session start updated."));
-        var updatedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
+        var updatedSession = sessionRepository.findFirstByOrderByStartDesc();
         assertThat(updatedSession.getStart()).isEqualTo(editedStart);
     }
 

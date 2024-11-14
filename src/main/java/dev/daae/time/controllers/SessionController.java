@@ -21,14 +21,14 @@ public class SessionController {
         var session = sessionRepository.findFirstByOrderByStartDesc();
         var now = LocalDateTime.now().atOffset(ZoneOffset.UTC);
 
-        if (session.isEmpty() || session.get().getEnd() != null) {
+        if (session == null || session.getEnd() != null) {
             var newSession = Session.newWithStartTime(now);
             sessionRepository.save(newSession);
             return "Started.";
         }
 
-        session.get().setEnd(now);
-        sessionRepository.save(session.get());
+        session.setEnd(now);
+        sessionRepository.save(session);
         return "Stopped.";
     }
 
@@ -40,12 +40,11 @@ public class SessionController {
 
     @PutMapping("/start")
     public String updateSessionStart(@RequestBody UpdateSessionRequest updateSessionRequest) {
-        var optionalSession = sessionRepository.findFirstByOrderByStartDesc();
-        if (optionalSession.isEmpty()) {
+        var session = sessionRepository.findFirstByOrderByStartDesc();
+        if (session == null) {
             return "No session to update.";
         }
 
-        var session = optionalSession.get();
         var start = session.getStart();
 
         var plus = updateSessionRequest.getPlus() instanceof Integer p ? p : 0;
@@ -61,12 +60,11 @@ public class SessionController {
 
     @PutMapping("/end")
     public String updateSessionEnd(@RequestBody UpdateSessionRequest updateSessionRequest) {
-        var optionalSession = sessionRepository.findFirstByOrderByStartDesc();
-        if (optionalSession.isEmpty()) {
+        var session = sessionRepository.findFirstByOrderByStartDesc();
+        if (session == null) {
             return "No session to update.";
         }
 
-        var session = optionalSession.get();
         var optionalEnd = session.getEnd();
         if (optionalEnd == null) {
             return "Can not update session end until session has ended.";

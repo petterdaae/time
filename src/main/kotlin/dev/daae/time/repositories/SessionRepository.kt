@@ -7,7 +7,7 @@ import java.time.OffsetDateTime
 import java.util.Optional
 
 interface SessionRepository : JpaRepository<Session?, Long?> {
-    fun findFirstByOrderByStartDesc(): Optional<Session?>?
+    fun findFirstByOrderByStartDesc(): Session?
 
     @Query(
         value = "select * from session where start >= date_trunc('week', cast(? as timestamptz))",
