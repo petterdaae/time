@@ -51,7 +51,7 @@ class StatusControllerTest extends IntegrationTest {
     @Test
     void currentStatusEndpointDescribesCurrentSessionIfTheLatestLogIsStart() throws Exception {
         var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
-        sessionRepository.save(Session.builder().start(start).build());
+        sessionRepository.save(new Session(null, start, null));
         when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
 
         mockClock(2020, 1, 1, 2, 3);
@@ -74,7 +74,7 @@ class StatusControllerTest extends IntegrationTest {
     void currentStatusEndpointDescribesPreviousSessionIfTheLatestLogIsStop() throws Exception {
         var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
         var end = LocalDateTime.of(2020, 1, 1, 2, 3).atOffset(ZoneOffset.UTC);
-        sessionRepository.save(Session.builder().start(start).end(end).build());
+        sessionRepository.save(new Session(null, start, end));
 
         var request = get("/status/current").with(validCredentials());
         var result = this.mockMvc.perform(request).andReturn();
@@ -83,7 +83,7 @@ class StatusControllerTest extends IntegrationTest {
 
         start = LocalDateTime.of(2020, 1, 1, 5, 0).atOffset(ZoneOffset.UTC);
         end = LocalDateTime.of(2020, 1, 1, 8, 0).atOffset(ZoneOffset.UTC);
-        sessionRepository.save(Session.builder().start(start).end(end).build());
+        sessionRepository.save(new Session(null, start, end));
 
         request = get("/status/current").with(validCredentials());
         result = this.mockMvc.perform(request).andReturn();
@@ -105,12 +105,12 @@ class StatusControllerTest extends IntegrationTest {
 
         var start = LocalDateTime.of(2024, 5, 20, 8, 0).atOffset(ZoneOffset.UTC);
         var end = LocalDateTime.of(2024, 5, 20, 16, 0).atOffset(ZoneOffset.UTC);
-        var monday = Session.builder().start(start).end(end).build();
+        var monday = new Session(null, start, end);
         sessionRepository.save(monday);
 
         start = LocalDateTime.of(2024, 5, 21, 8, 0).atOffset(ZoneOffset.UTC);
         end = LocalDateTime.of(2024, 5, 21, 16, 3).atOffset(ZoneOffset.UTC);
-        var tuesday = Session.builder().start(start).end(end).build();
+        var tuesday = new Session(null, start, end);
         sessionRepository.save(tuesday);
 
         var request = get("/status/week").with(validCredentials());

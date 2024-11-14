@@ -21,7 +21,7 @@ public class SessionController {
         var session = sessionRepository.findFirstByOrderByStartDesc();
         var now = LocalDateTime.now().atOffset(ZoneOffset.UTC);
 
-        if (session.isEmpty() || session.get().getEnd().isPresent()) {
+        if (session.isEmpty() || session.get().getEnd() != null) {
             var newSession = Session.newWithStartTime(now);
             sessionRepository.save(newSession);
             return "Started.";
@@ -68,10 +68,10 @@ public class SessionController {
 
         var session = optionalSession.get();
         var optionalEnd = session.getEnd();
-        if (optionalEnd.isEmpty()) {
+        if (optionalEnd == null) {
             return "Can not update session end until session has ended.";
         }
-        var end = optionalEnd.get();
+        var end = optionalEnd;
 
         var plus = updateSessionRequest.getPlus() instanceof Integer p ? p : 0;
         var minus = updateSessionRequest.getMinus() instanceof Integer m ? m : 0;

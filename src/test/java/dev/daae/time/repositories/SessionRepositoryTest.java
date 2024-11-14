@@ -17,14 +17,14 @@ class SessionRepositoryTest extends IntegrationTest {
     @Test
     void testThatLogIsReturnedFromRepositoryAfterItIsSaved() {
         var now = LocalDateTime.now().atOffset(ZoneOffset.UTC);
-        var session = repository.save(Session.builder().start(now).end(now).build());
+        var session = repository.save(new Session(null, now, now));
         repository.findById(session.getId()).orElseThrow();
     }
 
     @Test
     void testThatTimestampIsEqualBeforeAndAfterStoringIt() {
         var timestamp = LocalDateTime.now().atOffset(ZoneOffset.UTC);
-        var id = repository.save(Session.builder().start(timestamp).build()).getId();
+        var id = repository.save(new Session(null, timestamp, null)).getId();
         var session = repository.findById(id).orElseThrow();
         assertThat(session.getStart()).isEqualTo(timestamp);
     }

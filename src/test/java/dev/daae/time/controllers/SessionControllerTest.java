@@ -36,20 +36,20 @@ class SessionControllerTest extends IntegrationTest {
         assertThat(responseBody).isEqualTo("Started.");
         var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
         assertThat(savedSession.getStart()).isNotNull();
-        assertThat(savedSession.getEnd()).isEmpty();
+        assertThat(savedSession.getEnd()).isNull();
     }
 
     @Test
     void logEndpointSetsStopKindIfPreviousKindWasStart() throws Exception {
         var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
-        sessionRepository.save(Session.builder().start(start).build());
+        sessionRepository.save(new Session(null, start, null));
         var request = post("/session").with(validCredentials()).contentType(MediaType.APPLICATION_JSON);
         var result = this.mockMvc.perform(request).andExpect(status().isCreated()).andReturn();
         var responseBody = result.getResponse().getContentAsString();
         assertThat(responseBody).isEqualTo("Stopped.");
         var savedSession = sessionRepository.findFirstByOrderByStartDesc().orElseThrow();
         assertThat(savedSession.getStart()).isNotNull();
-        assertThat(savedSession.getEnd()).isPresent();
+        assertThat(savedSession.getEnd()).isNotNull();
     }
 
     @Test
@@ -65,7 +65,7 @@ class SessionControllerTest extends IntegrationTest {
     void testThatSessionStartIsUpdated() throws Exception {
         var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
         var editedStart = LocalDateTime.of(2020, 1, 1, 0, 5).atOffset(ZoneOffset.UTC);
-        var session = Session.builder().start(start).build();
+        var session = new Session(null, start, null);
         sessionRepository.save(session);
         this.mockMvc.perform(
                 put("/session/start")
@@ -82,7 +82,7 @@ class SessionControllerTest extends IntegrationTest {
     @Test
     void testThatSessionEndIsNotUpdatedWhenSessionHasNotEnded() throws Exception {
         var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC);
-        var session = Session.builder().start(start).build();
+        var session = new Session(null, start, null);
         sessionRepository.save(session);
         this.mockMvc.perform(
                 put("/session/end")

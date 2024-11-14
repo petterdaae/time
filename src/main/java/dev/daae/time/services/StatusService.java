@@ -31,12 +31,12 @@ public class StatusService {
 
         var now = LocalDateTime.now(clock).atOffset(ZoneOffset.UTC);
         var start = latest.getStart();
-        var end = latest.getEnd().orElse(now);
+        var end = latest.getEnd() != null ? latest.getEnd() : now;
 
         var duration = Duration.between(start, end);
         var formattedDuration = formatDuration(duration);
 
-        if (latest.getEnd().isEmpty()) {
+        if (latest.getEnd() == null) {
             return "\uD83C\uDFE2 " + formattedDuration;
         }
 
@@ -67,14 +67,14 @@ public class StatusService {
     private Duration durationOfSessions(List<Session> sessions) {
         var completedDuration = sessions
             .stream()
-            .filter(session -> session.getEnd().isPresent())
-            .map(session -> Duration.between(session.getStart(), session.getEnd().get()))
+            .filter(session -> session.getEnd() != null)
+            .map(session -> Duration.between(session.getStart(), session.getEnd()))
             .reduce(Duration.ZERO, Duration::plus);
 
         var now = OffsetDateTime.now(clock);
         var inProgressDuration = sessions
             .stream()
-            .filter(session -> session.getEnd().isEmpty())
+            .filter(session -> session.getEnd() == null)
             .map(session -> Duration.between(session.getStart(), now))
             .reduce(Duration.ZERO, Duration::plus);
 
