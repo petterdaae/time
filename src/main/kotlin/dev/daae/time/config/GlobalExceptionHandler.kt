@@ -13,9 +13,9 @@ class GlobalExceptionHandler {
     private val logger = KotlinLogging.logger {}
 
     @ExceptionHandler(Exception::class)
-    fun handleException(e: Exception): ResponseEntity<InternalServerErrorResponse?> {
+    fun handleException(e: Exception): ResponseEntity<InternalServerErrorResponse> {
         logger.error(e) { e.message }
-        return ResponseEntity<InternalServerErrorResponse?>(
+        return ResponseEntity<InternalServerErrorResponse>(
             InternalServerErrorResponse("Internal server error"),
             HttpStatus.INTERNAL_SERVER_ERROR,
         )
