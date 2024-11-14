@@ -48,8 +48,8 @@ public class SessionController {
         var session = optionalSession.get();
         var start = session.getStart();
 
-        var plus = updateSessionRequest.getPlus().orElse(0);
-        var minus = updateSessionRequest.getMinus().orElse(0);
+        var plus = updateSessionRequest.getPlus() instanceof Integer p ? p : 0;
+        var minus = updateSessionRequest.getMinus() instanceof Integer m ? m : 0;
         start = start.plusMinutes(plus);
         start = start.minusMinutes(minus);
 
@@ -73,8 +73,8 @@ public class SessionController {
         }
         var end = optionalEnd.get();
 
-        var plus = updateSessionRequest.getPlus().orElse(0);
-        var minus = updateSessionRequest.getMinus().orElse(0);
+        var plus = updateSessionRequest.getPlus() instanceof Integer p ? p : 0;
+        var minus = updateSessionRequest.getMinus() instanceof Integer m ? m : 0;
         end = end.plusMinutes(plus);
         end = end.minusMinutes(minus);
 
