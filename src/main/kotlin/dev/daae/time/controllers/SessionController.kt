@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 @RestController
@@ -24,7 +23,7 @@ class SessionController(
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createLog(): String {
-        val session = sessionRepository!!.findFirstByOrderByStartDesc()
+        val session = sessionRepository.findFirstByOrderByStartDesc()
         val now = LocalDateTime.now().atOffset(ZoneOffset.UTC)
 
         if (session == null || session.end != null) {
@@ -40,7 +39,7 @@ class SessionController(
 
     @DeleteMapping
     fun deleteAllSessions(): String {
-        sessionRepository!!.deleteAll()
+        sessionRepository.deleteAll()
         return "All sessions deleted."
     }
 
@@ -48,7 +47,7 @@ class SessionController(
     fun updateSessionStart(
         @RequestBody updateSessionRequest: UpdateSessionRequest,
     ): String {
-        val session = sessionRepository!!.findFirstByOrderByStartDesc()
+        val session = sessionRepository.findFirstByOrderByStartDesc()
         if (session == null) {
             return "No session to update."
         }
@@ -70,23 +69,19 @@ class SessionController(
     fun updateSessionEnd(
         @RequestBody updateSessionRequest: UpdateSessionRequest,
     ): String {
-        val session = sessionRepository!!.findFirstByOrderByStartDesc()
+        val session = sessionRepository.findFirstByOrderByStartDesc()
         if (session == null) {
             return "No session to update."
         }
 
-        val optionalEnd = session.end
-        if (optionalEnd == null) {
+        if (session.end == null) {
             return "Can not update session end until session has ended."
         }
-        var end: OffsetDateTime? = optionalEnd
 
         val plus = updateSessionRequest.plus ?: 0
         val minus = updateSessionRequest.minus ?: 0
-        end = end!!.plusMinutes(plus.toLong())
-        end = end.minusMinutes(minus.toLong())
-
-        session.end = end
+        session.end = session.end!!.plusMinutes(plus.toLong())
+        session.end = session.end!!.minusMinutes(minus.toLong())
         sessionRepository.save<Session?>(session)
 
         return "Session end updated."

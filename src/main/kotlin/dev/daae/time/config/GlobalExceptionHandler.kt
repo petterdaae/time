@@ -10,6 +10,7 @@ import java.lang.Exception
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
+
     private val logger = KotlinLogging.logger {}
 
     @ExceptionHandler(Exception::class)

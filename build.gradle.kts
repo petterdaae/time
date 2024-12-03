@@ -1,11 +1,18 @@
-import org.gradle.kotlin.dsl.support.kotlinCompilerOptions
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-	kotlin("jvm") version "2.0.21"
+	kotlin("jvm") version "1.9.25"
+	kotlin("plugin.spring") version "1.9.25"
 	id("org.springframework.boot") version "3.3.5"
 	id("io.spring.dependency-management") version "1.1.6"
 	id("com.diffplug.spotless") version "6.25.0"
+}
+
+group = "dev.daae"
+version = "1.0.0"
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
 }
 
 dependencies {
@@ -24,10 +31,6 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:postgresql")
-}
-
-kotlin {
-	jvmToolchain(21)
 }
 
 repositories {
