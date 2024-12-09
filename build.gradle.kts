@@ -24,7 +24,7 @@ dependencies {
 	implementation("org.flywaydb:flyway-database-postgresql")
 	implementation("org.postgresql:postgresql")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	implementation("io.github.oshai:kotlin-logging-jvm:7.0.0")
+	implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
