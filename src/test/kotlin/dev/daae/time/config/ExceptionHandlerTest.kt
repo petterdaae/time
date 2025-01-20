@@ -17,7 +17,7 @@ import java.lang.NullPointerException
 import java.lang.RuntimeException
 
 @AutoConfigureMockMvc
-internal class ExceptionHandlerTest() : IntegrationTest() {
+internal class ExceptionHandlerTest : IntegrationTest() {
     @Autowired
     private val mockMvc: MockMvc? = null
 

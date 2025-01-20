@@ -18,7 +18,7 @@ class Session(
 ) {
     companion object {
         @JvmStatic
-        fun newWithStartTime(start: OffsetDateTime): Session? {
+        fun newWithStartTime(start: OffsetDateTime): Session {
             return Session(null, start, null)
         }
     }

@@ -12,16 +12,16 @@ class StatusController(
 ) {
     @GetMapping("/current")
     fun currentStatus(): String {
-        return statusService!!.currentStatus()
+        return statusService.currentStatus()
     }
 
     @GetMapping("/week")
     fun currentWeek(): String {
-        return statusService!!.weekStatus()
+        return statusService.weekStatus()
     }
 
     @GetMapping("/today")
     fun today(): String {
-        return statusService!!.todayStatus()
+        return statusService.todayStatus()
     }
 }

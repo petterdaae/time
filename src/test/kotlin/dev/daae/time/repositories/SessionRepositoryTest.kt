@@ -7,22 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-internal class SessionRepositoryTest : dev.daae.time.IntegrationTest() {
+internal class SessionRepositoryTest(
     @Autowired
-    private val repository: dev.daae.time.repositories.SessionRepository? = null
-
+    private var repository: SessionRepository,
+) : dev.daae.time.IntegrationTest() {
     @Test
     fun testThatLogIsReturnedFromRepositoryAfterItIsSaved() {
         val now = LocalDateTime.now().atOffset(ZoneOffset.UTC)
-        val session = repository!!.save<Session>(Session(null, now, now))
-        repository.findById(session.id).orElseThrow()
+        val session = repository.save<Session>(Session(null, now, now))
+        session.id?.let { repository.findById(it).orElseThrow() }
     }
 
     @Test
     fun testThatTimestampIsEqualBeforeAndAfterStoringIt() {
         val timestamp = LocalDateTime.now().atOffset(ZoneOffset.UTC)
-        val id = repository!!.save<Session?>(Session(null, timestamp, null))!!.id
-        val session: Session = repository.findById(id).orElseThrow()!!
+        val id = repository.save(Session(null, timestamp, null)).id
+        val session: Session = id?.let { repository.findById(it).orElseThrow() }!!
         Assertions.assertThat(session.start).isEqualTo(timestamp)
     }
 }

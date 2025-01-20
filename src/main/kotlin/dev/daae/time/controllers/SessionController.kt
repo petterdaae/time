@@ -28,7 +28,7 @@ class SessionController(
 
         if (session == null || session.end != null) {
             val newSession = newWithStartTime(now)
-            sessionRepository.save<Session?>(newSession)
+            sessionRepository.save(newSession)
             return "Started."
         }
 
@@ -47,10 +47,7 @@ class SessionController(
     fun updateSessionStart(
         @RequestBody updateSessionRequest: UpdateSessionRequest,
     ): String {
-        val session = sessionRepository.findFirstByOrderByStartDesc()
-        if (session == null) {
-            return "No session to update."
-        }
+        val session = sessionRepository.findFirstByOrderByStartDesc() ?: return "No session to update."
 
         var start = session.start
 
@@ -69,10 +66,7 @@ class SessionController(
     fun updateSessionEnd(
         @RequestBody updateSessionRequest: UpdateSessionRequest,
     ): String {
-        val session = sessionRepository.findFirstByOrderByStartDesc()
-        if (session == null) {
-            return "No session to update."
-        }
+        val session = sessionRepository.findFirstByOrderByStartDesc() ?: return "No session to update."
 
         if (session.end == null) {
             return "Can not update session end until session has ended."

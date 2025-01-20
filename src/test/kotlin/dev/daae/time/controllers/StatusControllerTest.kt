@@ -28,9 +28,9 @@ internal class StatusControllerTest(
 
     @BeforeEach
     fun setup() {
-        sessionRepository!!.deleteAll()
-        Mockito.`when`<ZoneId?>(clock!!.getZone()).thenReturn(ZoneId.of("UTC"))
-        Mockito.`when`<Instant?>(clock!!.instant()).thenReturn(Instant.now())
+        sessionRepository.deleteAll()
+        Mockito.`when`(clock!!.zone).thenReturn(ZoneId.of("UTC"))
+        Mockito.`when`(clock!!.instant()).thenReturn(Instant.now())
     }
 
     @Test
@@ -60,22 +60,22 @@ internal class StatusControllerTest(
     @Throws(Exception::class)
     fun currentStatusEndpointDescribesCurrentSessionIfTheLatestLogIsStart() {
         val start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC)
-        sessionRepository!!.save<Session?>(Session(null, start, null))
-        Mockito.`when`<ZoneId?>(clock!!.getZone()).thenReturn(ZoneId.of("UTC"))
+        sessionRepository.save<Session?>(Session(null, start, null))
+        Mockito.`when`(clock!!.zone).thenReturn(ZoneId.of("UTC"))
 
         mockClock(2020, 1, 1, 2, 3)
         var request = MockMvcRequestBuilders.get("/status/current").with(validCredentials())
-        var result = this.mockMvc.perform(request).andReturn().getResponse().getContentAsString()
+        var result = this.mockMvc.perform(request).andReturn().response.contentAsString
         Assertions.assertThat(result).isEqualTo("\uD83C\uDFE2 02:03")
 
         mockClock(2020, 1, 1, 2, 0)
         request = MockMvcRequestBuilders.get("/status/current").with(validCredentials())
-        result = this.mockMvc.perform(request).andReturn().getResponse().getContentAsString()
+        result = this.mockMvc.perform(request).andReturn().response.contentAsString
         Assertions.assertThat(result).isEqualTo("\uD83C\uDFE2 02:00")
 
         mockClock(2020, 1, 1, 0, 3)
         request = MockMvcRequestBuilders.get("/status/current").with(validCredentials())
-        result = this.mockMvc.perform(request).andReturn().getResponse().getContentAsString()
+        result = this.mockMvc.perform(request).andReturn().response.contentAsString
         Assertions.assertThat(result).isEqualTo("\uD83C\uDFE2 00:03")
     }
 
@@ -84,11 +84,11 @@ internal class StatusControllerTest(
     fun currentStatusEndpointDescribesPreviousSessionIfTheLatestLogIsStop() {
         var start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC)
         var end = LocalDateTime.of(2020, 1, 1, 2, 3).atOffset(ZoneOffset.UTC)
-        sessionRepository!!.save<Session?>(Session(null, start, end))
+        sessionRepository.save<Session?>(Session(null, start, end))
 
         var request = MockMvcRequestBuilders.get("/status/current").with(validCredentials())
         var result = this.mockMvc.perform(request).andReturn()
-        var responseBody = result.getResponse().getContentAsString()
+        var responseBody = result.response.contentAsString
         Assertions.assertThat(responseBody).isEqualTo("\uD83D\uDE0C 02:03")
 
         start = LocalDateTime.of(2020, 1, 1, 5, 0).atOffset(ZoneOffset.UTC)
@@ -97,7 +97,7 @@ internal class StatusControllerTest(
 
         request = MockMvcRequestBuilders.get("/status/current").with(validCredentials())
         result = this.mockMvc.perform(request).andReturn()
-        responseBody = result.getResponse().getContentAsString()
+        responseBody = result.response.contentAsString
         Assertions.assertThat(responseBody).isEqualTo("\uD83D\uDE0C 03:00")
     }
 
@@ -106,7 +106,7 @@ internal class StatusControllerTest(
     fun currentStatusEndpointReturnsEmptyMessageWhenThereAreNoSessionsInTheDatabase() {
         val request = MockMvcRequestBuilders.get("/status/current").with(validCredentials())
         val result = this.mockMvc.perform(request).andReturn()
-        val responseBody = result.getResponse().getContentAsString()
+        val responseBody = result.response.contentAsString
         Assertions.assertThat(responseBody).isEqualTo("No sessions in database.")
     }
 
@@ -118,7 +118,7 @@ internal class StatusControllerTest(
         var start = LocalDateTime.of(2024, 5, 20, 8, 0).atOffset(ZoneOffset.UTC)
         var end = LocalDateTime.of(2024, 5, 20, 16, 0).atOffset(ZoneOffset.UTC)
         val monday = Session(null, start, end)
-        sessionRepository!!.save<Session?>(monday)
+        sessionRepository.save<Session?>(monday)
 
         start = LocalDateTime.of(2024, 5, 21, 8, 0).atOffset(ZoneOffset.UTC)
         end = LocalDateTime.of(2024, 5, 21, 16, 3).atOffset(ZoneOffset.UTC)
@@ -138,6 +138,6 @@ internal class StatusControllerTest(
         minute: Int,
     ) {
         val time = LocalDateTime.of(year, month, day, hour, minute).atOffset(ZoneOffset.UTC)
-        Mockito.`when`<Instant?>(clock!!.instant()).thenReturn(time.toInstant())
+        Mockito.`when`(clock!!.instant()).thenReturn(time.toInstant())
     }
 }

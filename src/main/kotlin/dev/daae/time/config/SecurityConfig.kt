@@ -9,14 +9,14 @@ import org.springframework.security.web.SecurityFilterChain
 
 @Configuration
 @EnableWebSecurity
-open class SecurityConfig {
+class SecurityConfig {
     @Bean
-    open fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
         http
             .authorizeHttpRequests {
                 it.anyRequest().authenticated()
             }
-            .csrf(Customizer { it.disable() })
+            .csrf { it.disable() }
             .httpBasic(Customizer.withDefaults())
             .build()
 }

@@ -16,10 +16,7 @@ class StatusService(
     private val clock: Clock,
 ) {
     fun currentStatus(): String {
-        val latest = sessionRepository.findFirstByOrderByStartDesc()
-        if (latest == null) {
-            return "No sessions in database."
-        }
+        val latest = sessionRepository.findFirstByOrderByStartDesc() ?: return "No sessions in database."
 
         val now = LocalDateTime.now(clock).atOffset(ZoneOffset.UTC)
         val start = latest.start
@@ -61,7 +58,7 @@ class StatusService(
             sessions
                 .stream()
                 .filter { session: Session? -> session!!.end != null }
-                .map<Duration> { session: Session? -> Duration.between(session!!.start, session.end) }
+                .map { session: Session? -> Duration.between(session!!.start, session.end) }
                 .reduce(Duration.ZERO) { obj: Duration?, duration: Duration? -> obj!!.plus(duration) }
 
         val now = OffsetDateTime.now(clock)
@@ -69,7 +66,7 @@ class StatusService(
             sessions
                 .stream()
                 .filter { session: Session? -> session!!.end == null }
-                .map<Duration> { session: Session? -> Duration.between(session!!.start, now) }
+                .map { session: Session? -> Duration.between(session!!.start, now) }
                 .reduce(Duration.ZERO) { obj: Duration?, duration: Duration? -> obj!!.plus(duration) }
 
         return completedDuration.plus(inProgressDuration)

@@ -16,14 +16,12 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 internal class SessionControllerTest(
-    @Autowired
-    private val sessionRepository: SessionRepository,
-    @Autowired
-    private val mockMvc: MockMvc,
+    @Autowired private val sessionRepository: SessionRepository,
+    @Autowired private val mockMvc: MockMvc,
 ) : dev.daae.time.IntegrationTest() {
     @BeforeEach
     fun beforeEach() {
-        sessionRepository!!.deleteAll()
+        sessionRepository.deleteAll()
     }
 
     @Test
@@ -32,9 +30,9 @@ internal class SessionControllerTest(
         val request =
             MockMvcRequestBuilders.post("/session").with(validCredentials()).contentType(MediaType.APPLICATION_JSON)
         val result = this.mockMvc.perform(request).andExpect(MockMvcResultMatchers.status().isCreated()).andReturn()
-        val responseBody = result.getResponse().getContentAsString()
+        val responseBody = result.response.contentAsString
         Assertions.assertThat(responseBody).isEqualTo("Started.")
-        val savedSession = sessionRepository!!.findFirstByOrderByStartDesc()
+        val savedSession = sessionRepository.findFirstByOrderByStartDesc()
         Assertions.assertThat(savedSession!!.start).isNotNull()
         Assertions.assertThat(savedSession.end).isNull()
     }
@@ -43,11 +41,11 @@ internal class SessionControllerTest(
     @Throws(Exception::class)
     fun logEndpointSetsStopKindIfPreviousKindWasStart() {
         val start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC)
-        sessionRepository!!.save<Session?>(Session(null, start, null))
+        sessionRepository.save<Session?>(Session(null, start, null))
         val request =
             MockMvcRequestBuilders.post("/session").with(validCredentials()).contentType(MediaType.APPLICATION_JSON)
         val result = this.mockMvc.perform(request).andExpect(MockMvcResultMatchers.status().isCreated()).andReturn()
-        val responseBody = result.getResponse().getContentAsString()
+        val responseBody = result.response.contentAsString
         Assertions.assertThat(responseBody).isEqualTo("Stopped.")
         val savedSession = sessionRepository.findFirstByOrderByStartDesc()
         Assertions.assertThat(savedSession!!.start).isNotNull()
@@ -59,9 +57,9 @@ internal class SessionControllerTest(
     fun testThatAllSessionsAreDeleted() {
         val request = MockMvcRequestBuilders.delete("/session").with(validCredentials())
         val result = this.mockMvc.perform(request).andReturn()
-        val responseBody = result.getResponse().getContentAsString()
+        val responseBody = result.response.contentAsString
         Assertions.assertThat(responseBody).isEqualTo("All sessions deleted.")
-        Assertions.assertThat<Session?>(sessionRepository!!.findAll()).isEmpty()
+        Assertions.assertThat<Session?>(sessionRepository.findAll()).isEmpty()
     }
 
     @Test
@@ -70,7 +68,7 @@ internal class SessionControllerTest(
         val start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC)
         val editedStart = LocalDateTime.of(2020, 1, 1, 0, 5).atOffset(ZoneOffset.UTC)
         val session = Session(null, start, null)
-        sessionRepository!!.save<Session?>(session)
+        sessionRepository.save<Session?>(session)
         this.mockMvc.perform(
             MockMvcRequestBuilders.put("/session/start")
                 .content("{\"plus\":5}")
@@ -88,7 +86,7 @@ internal class SessionControllerTest(
     fun testThatSessionEndIsNotUpdatedWhenSessionHasNotEnded() {
         val start = LocalDateTime.of(2020, 1, 1, 0, 0).atOffset(ZoneOffset.UTC)
         val session = Session(null, start, null)
-        sessionRepository!!.save<Session?>(session)
+        sessionRepository.save<Session?>(session)
         this.mockMvc.perform(
             MockMvcRequestBuilders.put("/session/end")
                 .content("{\"plus\":5}")
