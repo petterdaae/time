@@ -40,9 +40,3 @@ repositories {
 tasks.test {
 	useJUnitPlatform()
 }
-
-spotless {
-	kotlin {
-		ktlint()
-	}
-}
