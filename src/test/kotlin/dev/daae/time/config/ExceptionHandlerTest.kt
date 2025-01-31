@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -21,7 +21,7 @@ internal class ExceptionHandlerTest() : IntegrationTest() {
     @Autowired
     private val mockMvc: MockMvc? = null
 
-    @MockBean
+    @MockitoBean
     private val sessionRepository: SessionRepository? = null
 
     @Test
