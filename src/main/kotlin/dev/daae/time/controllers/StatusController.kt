@@ -11,17 +11,11 @@ class StatusController(
     private val statusService: StatusService,
 ) {
     @GetMapping("/current")
-    fun currentStatus(): String {
-        return statusService.currentStatus()
-    }
+    fun currentStatus() = statusService.currentStatus()
 
     @GetMapping("/week")
-    fun currentWeek(): String {
-        return statusService.weekStatus()
-    }
+    fun currentWeek() = statusService.weekStatus()
 
     @GetMapping("/today")
-    fun today(): String {
-        return statusService.todayStatus()
-    }
+    fun today(): String = statusService.todayStatus()
 }

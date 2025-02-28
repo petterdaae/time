@@ -5,7 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import java.time.OffsetDateTime
 
-interface SessionRepository : JpaRepository<Session?, Long?> {
+interface SessionRepository : JpaRepository<Session, Long> {
+
     fun findFirstByOrderByStartDesc(): Session?
 
     @Query(
@@ -14,6 +15,9 @@ interface SessionRepository : JpaRepository<Session?, Long?> {
     )
     fun findSessionsThisWeek(now: OffsetDateTime?): MutableList<Session?>?
 
-    @Query(value = "select * from session where start >= date_trunc('day', cast(? as timestamptz))", nativeQuery = true)
+    @Query(
+        value = "select * from session where start >= date_trunc('day', cast(? as timestamptz))",
+        nativeQuery = true
+    )
     fun findSessionsToday(now: OffsetDateTime?): MutableList<Session?>?
 }

@@ -20,6 +20,7 @@ import java.time.ZoneOffset
 class SessionController(
     private val sessionRepository: SessionRepository,
 ) {
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createLog(): String {
@@ -33,7 +34,7 @@ class SessionController(
         }
 
         session.end = now
-        sessionRepository.save<Session?>(session)
+        sessionRepository.save(session)
         return "Stopped."
     }
 
@@ -57,7 +58,7 @@ class SessionController(
         start = start.minusMinutes(minus.toLong())
 
         session.start = start
-        sessionRepository.save<Session?>(session)
+        sessionRepository.save(session)
 
         return "Session start updated."
     }
@@ -76,7 +77,7 @@ class SessionController(
         val minus = updateSessionRequest.minus ?: 0
         session.end = session.end!!.plusMinutes(plus.toLong())
         session.end = session.end!!.minusMinutes(minus.toLong())
-        sessionRepository.save<Session?>(session)
+        sessionRepository.save(session)
 
         return "Session end updated."
     }

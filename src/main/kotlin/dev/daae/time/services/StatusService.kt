@@ -15,6 +15,7 @@ class StatusService(
     private val sessionRepository: SessionRepository,
     private val clock: Clock,
 ) {
+
     fun currentStatus(): String {
         val latest = sessionRepository.findFirstByOrderByStartDesc() ?: return "No sessions in database."
 
